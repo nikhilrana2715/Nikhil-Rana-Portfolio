@@ -549,7 +549,8 @@
   /* ---------- Contact form → FormSubmit.co → Nikhil's inbox ---------- */
   // Static site, no backend: FormSubmit relays the message by email.
   // First ever submission sends an activation email to the inbox — click it once.
-  const MAIL_TO = 'nikhilrana21422@gmail.com';
+  const MAIL_TO = 'nikhilrana21422@gmail.com';           // shown to visitors only as fallback
+  const FORM_ID = '0c88452e7d7fb71cfdfb4317eb335a7b';     // FormSubmit alias for MAIL_TO (keeps address out of the request URL)
   const form = document.getElementById('contactForm');
   const status = document.getElementById('formStatus');
   const sendBtn = form.querySelector('button[type="submit"]');
@@ -577,14 +578,14 @@
     status.textContent = '';
     status.className = 'form__status';
     try {
-      const res = await fetch(`https://formsubmit.co/ajax/${MAIL_TO}`, {
+      const res = await fetch(`https://formsubmit.co/ajax/${FORM_ID}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
           name, email, message,
           _replyto: email,
           _subject: `Portfolio message from ${name}`,
-          _template: 'table',
+          _template: 'basic', // plain, simple email
           _captcha: 'false'
         })
       });
