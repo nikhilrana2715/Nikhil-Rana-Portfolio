@@ -584,7 +584,9 @@
         body: JSON.stringify({
           name, email, message,
           _replyto: email,
-          _subject: `Portfolio message from ${name}`,
+          // sender is always FormSubmit (no service may send "as" the visitor's Gmail);
+          // subject shows who wrote, and Reply goes to the visitor via _replyto
+          _subject: `${name} (${email}) — Portfolio message`,
           _template: 'basic', // plain, simple email
           _captcha: 'false'
         })
