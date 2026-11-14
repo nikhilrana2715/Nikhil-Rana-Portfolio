@@ -207,7 +207,6 @@ Want to make it your own? Start here:
 - 📧 Email: **nikhilrana21422@gmail.com**
 - 💼 LinkedIn: [nikhilrana27](https://www.linkedin.com/in/nikhilrana27)
 - 🐙 GitHub: [nikhilrana2715](https://github.com/nikhilrana2715)
-- 📸 Instagram: [nik.hil.21](https://instagram.com/nik.hil.21)
 
 ---
 
