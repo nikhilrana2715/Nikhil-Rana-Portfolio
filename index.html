@@ -1,458 +1,575 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nikhil Rana | Portfolio</title>
-    <link rel="icon" href="img7.png" type="image/png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@300;400;500&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nikhil Rana — Developer</title>
+  <meta name="description" content="Nikhil Rana — developer from Ranchi, India. Web apps, games and Android apps; developer at MRS Bearings and MCA student.">
+  <meta property="og:title" content="Nikhil Rana — Developer">
+  <meta property="og:description" content="Developer building web apps, games and Android apps — pick a door and step into the work.">
+  <meta property="og:image" content="assets/img1.jpg">
+  <link rel="icon" href="assets/img7.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css?v=3.5">
+  <link rel="stylesheet" href="style.css?v=3.5">
 </head>
+<body id="top">
+  <a class="skip" href="#main">Skip to content</a>
 
-<body>
-    <!-- Header & Navigation -->
-    <header>
-        <div class="container">
-            <nav>
-                <div class="logo">Nikhil<span>.</span></div>
-                <ul class="nav-links">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#skills">Skills</a></li>
-                    <li><a href="#projects">Projects</a></li>
-                    <li><a href="#achievements">Achievements</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-                <div class="hamburger">
-                    <i class="fas fa-bars"></i>
-                </div>
-            </nav>
+  <!-- Nav / Header -->
+  <header class="nav">
+    <div class="container nav__inner">
+      <a href="#top" class="nav__logo" aria-label="Nikhil Rana, home">Nikhil Rana<span>.</span></a>
+      <nav aria-label="Primary">
+        <ul class="nav__links" id="navLinks">
+          <li><a href="#about">About</a></li>
+          <li><a href="#story">My story</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#work">Work</a></li>
+          <li><a href="#certs">Certifications</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="nav__actions">
+        <div class="clock-pill" aria-label="Local time in Ranchi">
+          <span class="muted">Local time</span><b class="js-time">--:--</b><span class="clock-pill__sep">·</span><span class="js-date">--</span>
         </div>
-    </header>
+        <a href="#contact" class="btn btn--primary btn--sm nav__cta">Let's talk</a>
+        <button class="icon-btn nav__burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <h1>Hi, I'm <span>Nikhil Rana</span></h1>
-                    <h2>Computer Science Student & Developer</h2>
-                    <p>Passionate about creating elegant solutions to complex problems through code. Currently pursuing
-                        my degree in Computer Science with a focus on web technologies and Python development.</p>
-                    <div class="hero-btns">
-                        <a href="https://www.canva.com/design/DAGh5iLuXO0/rZ2X4AYI9kpGK9Rows7Jew/view?utm_content=DAGh5iLuXO0&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hd00691e012"
-                            class="btn btn-primary" target="_blank">Download Resume</a>
-                        <a href="#contact" class="btn btn-outline">Contact Me</a>
-                    </div>
-                </div>
-                <div class="hero-image">
-                    <div class="profile-container">
-                        <!-- <div class="profile-img"></div> -->
-                        <img src="img1.jpg" alt="Nikhil Rana"
-                            class="profile-img">
-                    </div>
-                </div>
-            </div>
+  <!-- Pull cord: drag down (or click / Enter) to switch the lights -->
+  <button class="cord" id="cord" type="button" aria-label="Pull cord to toggle dark mode" aria-pressed="false">
+    <span class="cord__rope"></span>
+    <span class="cord__cap"></span>
+    <span class="cord__bob"></span>
+  </button>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero__grid">
+        <div class="hero__text reveal">
+          <span class="chip chip--light"><span class="dot"></span>Developer · MCA student · Ranchi</span>
+          <h1 class="display hero__title">Hi, I'm Nikhil.<br><span class="muted">I am a</span><span class="sr-only"> web, app and game developer.</span></h1>
+          <div class="flip" id="flip" aria-hidden="true" data-words="Web Developer|App Developer|Game Developer|Python Developer|MCA Student">
+            <span class="flip__rings"></span>
+            <span class="flip__stack">
+              <span class="flip__page flip__page--next"><b class="flip__word">App Developer</b></span>
+              <span class="flip__page flip__page--front"><b class="flip__word">Web Developer</b></span>
+            </span>
+            <span class="flip__count"><b>01</b> / 05</span>
+          </div>
+          <p class="lead">Developer from Ranchi, India — building web apps, games and Android apps. Currently at MRS Bearings and doing my MCA.</p>
+          <div class="hero__btns">
+            <a href="https://drive.google.com/file/d/1fOhgtM-z2Djm2z56_rHmaTW-F3Zb-YpO/view" class="btn btn--primary" target="_blank" rel="noopener">View resume
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+            </a>
+            <a href="#work" class="btn btn--secondary">See my work</a>
+          </div>
         </div>
+
+        <div class="hero__visual reveal">
+          <div class="meta-pill"><span class="js-time">--:--</span> in Ranchi, IN</div>
+          <figure class="portrait" id="portrait">
+            <img class="portrait__base" src="assets/img1.jpg" alt="Portrait of Nikhil Rana" width="1237" height="1237">
+            <img class="portrait__color" src="assets/img1.jpg" alt="" aria-hidden="true" width="1237" height="1237">
+          </figure>
+          <div class="ability" id="ability">
+            <button class="chip chip--dark ability__pill" id="abilityBtn" type="button" aria-haspopup="dialog" aria-controls="vault">
+              <span class="ability__dot" aria-hidden="true"></span>My ability card
+            </button>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="container">
-            <div class="section-title">
-                <h2>About Me</h2>
-            </div>
-            <div class="about-content">
-                <div class="about-text">
-                    <h3>Computer Science Student & Developer from Ranchi, India</h3>
-                    <p>I'm a passionate computer science student specializing in web development, Python programming,
-                        and software engineering. With a strong foundation in algorithms and data structures, I thrive
-                        on solving complex problems and building innovative solutions.</p>
-                    <p>My journey in tech began when I wrote my first Python script at 16, and since then I've been
-                        constantly expanding my skillset. Currently pursuing my Bachelor's degree, I'm deeply involved
-                        in both academic projects and real-world applications.</p>
-                    <p>When I'm not coding, you can find me contributing to open-source projects, participating in
-                        hackathons, or exploring new technologies in the ever-evolving world of computer science.</p>
-
-                    <div class="about-stats">
-                        <div class="stat-box">
-                            <i class="fas fa-project-diagram"></i>
-                            <h4>6+</h4>
-                            <p>Projects Completed</p>
-                        </div>
-                        <div class="stat-box">
-                            <i class="fas fa-code"></i>
-                            <h4>1+</h4>
-                            <p>Years of Experience</p>
-                        </div>
-                        <div class="stat-box">
-                            <i class="fas fa-certificate"></i>
-                            <h4>4</h4>
-                            <p>Certifications</p>
-                        </div>
-                        <div class="stat-box">
-                            <i class="fas fa-gamepad"></i>
-                            <h4>1</h4>
-                            <p>Game Projects</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- About -->
+    <section class="section" id="about">
+      <div class="container about">
+        <p class="eyebrow reveal">About</p>
+        <div class="about__body">
+          <h2 class="h-lg reveal">I wrote my first Python script at 16. I haven't stopped building since.</h2>
+          <div class="about__cols reveal">
+            <p>Since February 2026 I've been a developer at MRS Bearings Pvt. Ltd., building in-house software for real users — like a production dashboard that turns the day's Excel report into a live morning-meeting view. I finished my BCA in 2026 and I'm now doing my MCA (2026–2028) alongside the job.</p>
+            <p>Outside work I build games and apps: a Canvas arcade game, a 3D runner, an Android app lock and a Windows app lock in Rust. Every project is a way to learn a new tool by shipping something people can actually use.</p>
+          </div>
+          <dl class="stats reveal">
+            <div class="stat"><dt>Projects shipped</dt><dd>7+</dd></div>
+            <div class="stat"><dt>Games live</dt><dd>2</dd></div>
+            <div class="stat"><dt>Platforms</dt><dd>3</dd></div>
+            <div class="stat"><dt>Certifications</dt><dd>4</dd></div>
+          </dl>
         </div>
+      </div>
     </section>
 
-    <!-- Skills Section -->
-    <section id="skills" class="skills">
-        <div class="container">
-            <div class="section-title">
-                <h2>My Skills</h2>
-            </div>
-            <div class="skills-container">
-                <div class="skill-category">
-                    <h3><i class="fas fa-laptop-code"></i> Web Development</h3>
-                    <div class="skill-item">
-                        <div class="skill-info">
-                            <span>HTML/CSS</span>
-                            <span>90%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-width="90"></div>
-                        </div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-info">
-                            <span>JavaScript</span>
-                            <span>70%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-width="70"></div>
-                        </div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-info">
-                            <span>React</span>
-                            <span>75%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-width="75"></div>
-                        </div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-info">
-                            <span>Node.js</span>
-                            <span>80%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-width="80"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="skill-category">
-                    <h3><i class="fas fa-code"></i> Programming & Game Design</h3>
-                    <div class="skill-item">
-                        <div class="skill-info">
-                            <span>Python</span>
-                            <span>80%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-width="80"></div>
-                        </div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-info">
-                            <span>Game Development</span>
-                            <span>50%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-width="50"></div>
-                        </div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-info">
-                            <span>Java</span>
-                            <span>70%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-width="70"></div>
-                        </div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-info">
-                            <span>SQL</span>
-                            <span>60%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-width="60"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Now: Job + MCA -->
+    <section class="section section--tint" id="now">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Right now</p>
+          <h2 class="h-lg">Two tracks, one goal.</h2>
+          <p class="lead">Working a full-time job and doing my MCA at the same time — one keeps me practical, the other keeps me sharp.</p>
         </div>
+        <div class="tracks">
+          <article class="track reveal">
+            <header class="track__head">
+              <span class="chip chip--dark">Track 01</span>
+              <h3 class="h-md">Job</h3>
+            </header>
+            <ol class="track__list">
+              <li><span class="track__n">01</span><div><h4 class="h-sm">Real-time projects</h4><p class="muted body-sm">Shipping live work for real users and real deadlines — not demo apps.</p></div></li>
+              <li><span class="track__n">02</span><div><h4 class="h-sm">Requirement research &amp; build</h4><p class="muted body-sm">Understand the requirement first, research the right approach, then build it end to end.</p></div></li>
+            </ol>
+          </article>
+          <article class="track reveal">
+            <header class="track__head">
+              <span class="chip chip--dark">Track 02</span>
+              <h3 class="h-md">MCA</h3>
+            </header>
+            <ol class="track__list">
+              <li><span class="track__n">01</span><div><h4 class="h-sm">Real-time study</h4><p class="muted body-sm">Learning on live problems, applying each concept at work the same week.</p></div></li>
+              <li><span class="track__n">02</span><div><h4 class="h-sm">Core language + English</h4><p class="muted body-sm">Deepening core programming (Java, Python, DSA) and professional English communication.</p></div></li>
+              <li><span class="track__n">03</span><div><h4 class="h-sm">Project</h4><p class="muted body-sm">An MCA project that pulls both tracks together into one real product.</p></div></li>
+            </ol>
+          </article>
+        </div>
+      </div>
     </section>
 
-    <!-- Projects Section -->
-    <section id="projects" class="projects">
-        <div class="container">
-            <div class="section-title">
-                <h2>My Projects</h2>
+    <!-- My story: scroll timeline -->
+    <section class="story" id="story" aria-label="My story">
+      <div class="story__glow" aria-hidden="true"><span class="glow glow--a"></span><span class="glow glow--b"></span></div>
+      <div class="container story__grid">
+        <div class="story__aside">
+          <div class="story__sticky">
+            <svg class="dial" id="dial" viewBox="-300 -300 600 600" aria-hidden="true"></svg>
+            <p class="story__kicker"><span class="dot dot--ink"></span>My story</p>
+            <h2 class="h-lg story__title">Let's go back in time.</h2>
+            <div class="odo" id="odo" aria-live="polite" aria-label="2026"></div>
+            <p class="mono story__period" id="storyPeriod">PRESENT</p>
+            <div class="story__count">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>
+              <b id="storyIdx">01</b><span class="muted">/ <span id="storyTotal">05</span></span>
+              <span class="story__bar"><span id="storyBar"></span></span>
             </div>
-            <div class="projects-grid">
-                <div class="project-card">
-                    <!-- <div class="project-img"></div> -->
-                     <img src="img2.jpg" alt="Project Image" class="project-img">
-                    <div class="project-content">
-                        <h3>Hotel Ticket Booking</h3>
-                        <p>A full-featured hotel booking platform with search, filtering, and reservation capabilities.
-                        </p>
-                        <div class="project-tech">
-                            <span class="tech-tag">JavaScript</span>
-                            <span class="tech-tag">HTML/CSS</span>
-                            <span class="tech-tag">Netlify</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="http://hotelticketbooking.netlify.app/" class="btn btn-outline"
-                                target="_blank">View Demo</a>
-                            <a href="https://github.com/nikhilrana2715/Hotelticketbooking/tree/main/Hotel%20Booking"
-                                class="btn btn-primary" target="_blank">Source Code</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <!-- <div class="project-img"></div> -->
-                    <img src="img3.jpg" alt="Project Image" class="project-img">
-                    <div class="project-content">
-                        <h3>NexusTech | AI Solutions for Modern Businesses</h3>
-                        <p>NexusTech provides cutting-edge technology solutions to help businesses automate processes, enhance
-                    customer experiences, and drive growth in the digital age.
-                        </p>
-                        <div class="project-tech">
-                            <span class="tech-tag">JavaScript</span>
-                            <span class="tech-tag">HTML/CSS</span>
-                            <span class="tech-tag">GitHub</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://nikhilrana2715.github.io/NexusTech-AI-Solutions-for-Modern-Businesses/" class="btn btn-outline"
-                                target="_blank">View Demo</a>
-                            <a href="https://github.com/nikhilrana2715/NexusTech-AI-Solutions-for-Modern-Businesses"
-                                class="btn btn-primary" target="_blank">Source Code</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <!-- <div class="project-img"></div> -->
-                    <img src="img4.jpg" alt="Project Image" class="project-img">
-                    <div class="project-content">
-                        <h3>JRU University Tech Club</h3>
-                        <p>From a small 2010 start to 500+ members today — the Tech Club unites students from all streams.
-                        </p>
-                        <div class="project-tech">
-                            <span class="tech-tag">JavaScript</span>
-                            <span class="tech-tag">HTML/CSS</span>
-                            <span class="tech-tag">GitHub</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://nikhilrana2715.github.io/JRU-University-Tech-Club/" class="btn btn-outline"
-                                target="_blank">View Demo</a>
-                            <a href="https://github.com/nikhilrana2715/JRU-University-Tech-Club"
-                                class="btn btn-primary" target="_blank">Source Code</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <!-- <div class="project-img"></div> -->
-                    <img src="img5.jpg" alt="Project Image" class="project-img">
-                    <div class="project-content">
-                        <h3>Student Management Dashboard</h3>
-                        <p>This dashboard helps manage student profiles, academic details, and performance through an intuitive interface.
-                        </p>
-                        <div class="project-tech">
-                            <span class="tech-tag">JavaScript</span>
-                            <span class="tech-tag">HTML/CSS</span>
-                            <span class="tech-tag">GitHub</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://nikhilrana2715.github.io/Student-Management-Dashboard/" class="btn btn-outline"
-                                target="_blank">View Demo</a>
-                            <a href="https://github.com/nikhilrana2715/Student-Management-Dashboard"
-                                class="btn btn-primary" target="_blank">Source Code</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <!-- <div class="project-img"></div> -->
-                    <img src="img6.jpg" alt="Project Image" class="project-img">
-                    <div class="project-content">
-                        <h3>ShopHub---Premium-Online-Shopping</h3>
-                        <p>ShopHub is a premium online shopping platform offering a seamless and user-friendly experience for browsing and buying products.
-                        </p>
-                        <div class="project-tech">
-                            <span class="tech-tag">JavaScript</span>
-                            <span class="tech-tag">HTML/CSS</span>
-                            <span class="tech-tag">GitHub</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://nikhilrana2715.github.io/ShopHub---Premium-Online-Shopping/" class="btn btn-outline"
-                                target="_blank">View Demo</a>
-                            <a href="https://github.com/nikhilrana2715/ShopHub---Premium-Online-Shopping"
-                                class="btn btn-primary" target="_blank">Source Code</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="project-card">
-                    <!-- <div class="project-img"></div> -->
-                    <img src="img7.jpg" alt="Project Image" class="project-img">
-                    <div class="project-content">
-                        <h3>Doodle Jump Website Game</h3>
-                        <p>A web-based implementation of the popular Doodle Jump game with responsive controls.</p>
-                        <div class="project-tech">
-                            <span class="tech-tag">JavaScript</span>
-                            <span class="tech-tag">HTML5 Canvas</span>
-                            <span class="tech-tag">Game Design</span>
-                        </div>
-                        <div class="project-links">
-                             <a href="https://nikhilrana2715.github.io/Doodle-Jump-website-Game/" class="btn btn-outline"
-                                target="_blank">View Demo</a>
-                            <a href="https://github.com/nikhilrana2715/Doodle-Jump-website-Game/"
-                                class="btn btn-primary" target="_blank">Source Code</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
+
+        <!-- Edit years/periods/text here. data-year drives the big rolling number. -->
+        <ol class="timeline" id="timeline">
+          <li class="tl" data-year="2026" data-period="PRESENT" data-glow="#E9A47C,#C9D4F0">
+            <p class="mono">Present</p>
+            <h3 class="h-md">Developer</h3>
+            <p class="tl__org">MRS Bearings Pvt. Ltd. · Full-time</p>
+            <ul class="tl__pts">
+              <li>Building real-time projects end to end, from the first requirement to a working, deployed product.</li>
+              <li>Shipped the Morning Meeting App: upload the day's Excel report, get a live production dashboard.</li>
+            </ul>
+          </li>
+          <li class="tl" data-year="2026" data-period="2026 — 2028" data-glow="#A9C98F,#E8D3A8">
+            <p class="mono">2026 — 2028</p>
+            <h3 class="h-md">MCA</h3>
+            <p class="tl__org">Master of Computer Applications · alongside the job</p>
+            <ul class="tl__pts">
+              <li>Real-time study: learning on live problems at work, not only the syllabus.</li>
+              <li>Core languages (Java, Python, DSA) plus professional English; MCA project in progress.</li>
+            </ul>
+          </li>
+          <li class="tl" data-year="2026" data-period="FEB 2026" data-glow="#C9B6E4,#F2C2A0">
+            <p class="mono">Feb 2026</p>
+            <h3 class="h-md">Placement at MRS Bearings</h3>
+            <p class="tl__org">MRS Bearings Private Limited</p>
+            <ul class="tl__pts">
+              <li>Got placed in February 2026, during the final semester of my BCA.</li>
+              <li>Moved from coursework to production software that a factory team uses every morning.</li>
+            </ul>
+          </li>
+          <li class="tl" data-year="2024" data-period="2024 — 2026" data-glow="#9FC3D6,#E7B7B7">
+            <p class="mono">2024 — 2026</p>
+            <h3 class="h-md">Web projects &amp; internship</h3>
+            <p class="tl__org">Internship · self-driven projects</p>
+            <ul class="tl__pts">
+              <li>Internship experience on real requirements, alongside my own web projects.</li>
+              <li>Shipped games and apps: Nova Hop, Funny Jump, NeumoRemind, Quick Lock, AppLock and Zenith Task.</li>
+            </ul>
+          </li>
+          <li class="tl" data-year="2023" data-period="2023 — 2026" data-glow="#E6C27A,#B9CBB0">
+            <p class="mono">2023 — 2026</p>
+            <h3 class="h-md">BCA</h3>
+            <p class="tl__org">Bachelor of Computer Applications · Ranchi, Jharkhand</p>
+            <ul class="tl__pts">
+              <li>Foundations in data structures, algorithms, web technologies, Java and Python.</li>
+              <li>Started with my first Python script at 16; hackathons and certifications followed.</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
     </section>
 
-    <!-- Certifications & Achievements -->
-    <section id="achievements" class="cert-achievements">
-        <div class="container">
-            <div class="section-title">
-                <h2>Certifications & Achievements</h2>
-            </div>
-            <div class="ca-container">
-                <div class="ca-card">
-                    <i class="fas fa-certificate"></i>
-                    <h3>Web Development Fundamentals</h3>
-                    <p>Certification in core web technologies including HTML, CSS, and JavaScript.</p>
-                    <span class="date">Issued: 2024</span>
-                </div>
-
-                <div class="ca-card">
-                    <i class="fas fa-certificate"></i>
-                    <h3>Python Programming</h3>
-                    <p>Professional certification in Python programming and application development.</p>
-                    <span class="date">Issued: 2023</span>
-                </div>
-
-                <div class="ca-card">
-                    <i class="fas fa-certificate"></i>
-                    <h3>Game Design Principles</h3>
-                    <p>Fundamentals of game design and development for web platforms.</p>
-                    <span class="date">Issued: 2023</span>
-                </div>
-
-                <div class="ca-card">
-                    <i class="fas fa-certificate"></i>
-                    <h3>Frontend Development</h3>
-                    <p>Advanced techniques for building responsive and interactive web applications.</p>
-                    <span class="date">Issued: 2024</span>
-                </div>
-            </div>
+    <!-- Skills -->
+    <section class="section section--tint" id="skills">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Skills</p>
+          <h2 class="h-lg">Tools I reach for.</h2>
         </div>
+        <div class="skills">
+          <article class="card card--skill reveal">
+            <h3 class="h-sm">Web development</h3>
+            <p class="body-sm muted">Responsive, accessible interfaces and the servers behind them.</p>
+            <ul class="tags">
+              <li class="tag">HTML &amp; CSS</li><li class="tag">JavaScript</li><li class="tag">TypeScript</li><li class="tag">React</li><li class="tag">Node.js</li><li class="tag">Express</li><li class="tag">SQLite</li><li class="tag">PWA</li>
+            </ul>
+          </article>
+          <article class="card card--skill reveal">
+            <h3 class="h-sm">Programming &amp; apps</h3>
+            <p class="body-sm muted">Problem solving, app logic and native desktop / Android builds.</p>
+            <ul class="tags">
+              <li class="tag">Python</li><li class="tag">Java</li><li class="tag">Kotlin</li><li class="tag">Rust</li><li class="tag">Tauri</li><li class="tag">Electron</li><li class="tag">DSA</li><li class="tag">Git</li>
+            </ul>
+          </article>
+          <article class="card card--skill reveal">
+            <h3 class="h-sm">Game design</h3>
+            <p class="body-sm muted">Browser games in 2D and 3D, with physics, input, sound and offline play.</p>
+            <ul class="tags">
+              <li class="tag">HTML5 Canvas</li><li class="tag">three.js</li><li class="tag">Web Audio</li><li class="tag">Game loops</li><li class="tag">Collision</li>
+            </ul>
+          </article>
+        </div>
+      </div>
     </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <div class="section-title">
-                <h2>Get In Touch</h2>
-            </div>
-            <div class="contact-container">
-                <div class="contact-info">
-                    <h3>Let's Connect</h3>
-                    <p>Feel free to reach out for collaboration or just to say hello!</p>
-
-                    <div class="contact-details">
-                        <div class="contact-item">
-                            <i class="fas fa-envelope"></i>
-                            <div>
-                                <h4>Email</h4>
-                                <p>nikhilrana21422@gmail.com</p>
-                            </div>
-                        </div>
-
-                        <div class="contact-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <div>
-                                <h4>Location</h4>
-                                <p>Ranchi, Jharkhand, India</p>
-                            </div>
-                        </div>
-
-                        <div class="contact-item">
-                            <i class="fas fa-phone"></i>
-                            <div>
-                                <h4>Phone</h4>
-                                <p>+91 7321068215</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h4>Follow Me</h4>
-                    <div class="social-links">
-                        <a href="https://www.linkedin.com/in/nikhilrana27" target="_blank"><i
-                        class="fab fa-linkedin-in"></i></a>
-                        <a href="https://github.com/nikhilrana2715" target="_blank"><i class="fab fa-github"></i></a>
-                        <a href="https://instagram.com/nik.hil.21" target="_blank"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-
-                <div class="contact-form">
-                    <form>
-                        <div class="form-group">
-                            <input type="text" placeholder="Your Name" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="email" placeholder="Your Email" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" placeholder="Subject">
-                        </div>
-                        <div class="form-group">
-                            <textarea placeholder="Your Message" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Send Message</button>
-                    </form>
-                </div>
-            </div>
+    <!-- Work: hall of doors (Card / Door). Each door opens a Room (#/games, #/web, #/apps) -->
+    <section class="section hall-section" id="work">
+      <div class="container">
+        <div class="section__head section__head--center reveal">
+          <p class="eyebrow">Selected work</p>
+          <h2 class="h-lg">Pick a door. Step into the work.</h2>
+          <p class="lead">Three rooms: games, web apps and apps. Hover to peek, click to walk in.</p>
         </div>
+      </div>
+      <div class="hall reveal" id="hall">
+        <div class="hall__doors">
+          <a class="door door--rust" href="#/games" data-room="games" aria-label="Enter Games: 2 projects">
+            <span class="door__frame">
+              <span class="door__light" aria-hidden="true"></span>
+              <span class="door__leaf" aria-hidden="true">
+                <span class="door__plaque">Game<br>developer</span>
+                <span class="door__handle"></span>
+                <span class="door__keyhole"></span>
+              </span>
+            </span>
+            <span class="door__label"><b>Games</b> · 02</span>
+          </a>
+          <a class="door door--navy" href="#/web" data-room="web" aria-label="Enter Web Apps: 3 projects">
+            <span class="door__frame">
+              <span class="door__light" aria-hidden="true"></span>
+              <span class="door__leaf" aria-hidden="true">
+                <span class="door__plaque">Web app<br>developer</span>
+                <span class="door__handle"></span>
+                <span class="door__keyhole"></span>
+              </span>
+            </span>
+            <span class="door__label"><b>Web Apps</b> · 03</span>
+          </a>
+          <a class="door door--sage" href="#/apps" data-room="apps" aria-label="Enter Apps: 2 projects">
+            <span class="door__frame">
+              <span class="door__light" aria-hidden="true"></span>
+              <span class="door__leaf" aria-hidden="true">
+                <span class="door__plaque">App<br>developer</span>
+                <span class="door__handle"></span>
+                <span class="door__keyhole"></span>
+              </span>
+            </span>
+            <span class="door__label"><b>Apps</b> · 02</span>
+          </a>
+        </div>
+        <div class="hall__panel" data-for="games" aria-hidden="true">
+          <h3 class="h-md">Games</h3>
+          <p class="mono">Play first, polish always</p>
+          <ul class="ticks"><li>Canvas &amp; three.js gameplay</li><li>Combos, power-ups &amp; skins</li><li>Offline PWA + Android builds</li><li>Sound with the Web Audio API</li><li>Leaderboards &amp; daily missions</li></ul>
+        </div>
+        <div class="hall__panel" data-for="web" aria-hidden="true">
+          <h3 class="h-md">Web Apps</h3>
+          <p class="mono">Real tools for real work</p>
+          <ul class="ticks"><li>Dashboards from raw Excel data</li><li>Reminders with push notifications</li><li>Desktop builds with Electron &amp; Tauri</li><li>Express + SQLite back-ends</li><li>Security-first by default</li></ul>
+        </div>
+        <div class="hall__panel" data-for="apps" aria-hidden="true">
+          <h3 class="h-md">Apps</h3>
+          <p class="mono">On your phone, on your PC</p>
+          <ul class="ticks"><li>Kotlin + Jetpack Compose</li><li>Fingerprint, PIN &amp; pattern locks</li><li>Capacitor Android packaging</li><li>Alarms that survive restarts</li><li>Signed APK releases</li></ul>
+        </div>
+        <span class="hall__floor" aria-hidden="true"></span>
+        <span class="hall__cursor" aria-hidden="true">Click to enter</span>
+      </div>
     </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">Nikhil<span>.</span></div>
-                <div class="footer-links">
-                    <a href="#home">Home</a>
-                    <a href="#about">About</a>
-                    <a href="#skills">Skills</a>
-                    <a href="#projects">Projects</a>
-                    <a href="#achievements">Achievements</a>
-                    <a href="#contact">Contact</a>
-                </div>
-                <p class="copyright">© 2026 Nikhil Rana. All Rights Reserved.</p>
-            </div>
+    <!-- Certifications -->
+    <section class="section section--tint" id="certs">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Certifications</p>
+          <h2 class="h-lg">Always learning.</h2>
         </div>
-    </footer>
-    <script src="script.js">script</script>
+        <ol class="certs">
+          <li class="cert reveal"><span class="cert__year">2024</span><div><h3 class="h-sm">Frontend Development</h3><p class="muted body-sm">Advanced techniques for responsive, interactive web apps.</p></div></li>
+          <li class="cert reveal"><span class="cert__year">2024</span><div><h3 class="h-sm">Web Development Fundamentals</h3><p class="muted body-sm">Core web technologies — HTML, CSS and JavaScript.</p></div></li>
+          <li class="cert reveal"><span class="cert__year">2023</span><div><h3 class="h-sm">Python Programming</h3><p class="muted body-sm">Python programming and application development.</p></div></li>
+          <li class="cert reveal"><span class="cert__year">2023</span><div><h3 class="h-sm">Game Design Principles</h3><p class="muted body-sm">Fundamentals of game design for web platforms.</p></div></li>
+        </ol>
+      </div>
+    </section>
 
+    <!-- Contact -->
+    <section class="section" id="contact">
+      <div class="container contact">
+        <div class="contact__intro reveal">
+          <p class="eyebrow">Contact</p>
+          <h2 class="display display--sm">Let's build<br>something.</h2>
+          <p class="lead">Freelance project, collaboration, or just a hello — my inbox is open.</p>
+          <ul class="contact__list">
+            <li><span class="caption">Email</span><a href="mailto:nikhilrana21422@gmail.com">nikhilrana21422@gmail.com</a></li>
+            <li><span class="caption">Phone</span><a href="tel:+917321068215">+91 73210 68215</a></li>
+            <li><span class="caption">Based in</span><span>Ranchi, Jharkhand, India</span></li>
+          </ul>
+          <div class="socials">
+            <a class="btn btn--secondary btn--sm" href="https://www.linkedin.com/in/nikhilrana27" target="_blank" rel="noopener">LinkedIn</a>
+            <a class="btn btn--secondary btn--sm" href="https://github.com/nikhilrana2715" target="_blank" rel="noopener">GitHub</a>
+            <a class="btn btn--secondary btn--sm" href="https://instagram.com/nik.hil.21" target="_blank" rel="noopener">Instagram</a>
+          </div>
+        </div>
 
+        <form class="card card--form reveal" id="contactForm" novalidate>
+          <div class="field">
+            <label for="name">Name</label>
+            <input class="input" id="name" name="name" type="text" placeholder="Your name" required autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input class="input" id="email" name="email" type="email" placeholder="you@example.com" required autocomplete="email">
+          </div>
+          <div class="field">
+            <label for="message">Message</label>
+            <textarea class="input input--area" id="message" name="message" rows="5" placeholder="Tell me about your project" required></textarea>
+          </div>
+          <!-- spam trap: real people never see or fill this -->
+          <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>
+          <button type="submit" class="btn btn--primary btn--block">Send message</button>
+          <p class="form__status" id="formStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Rooms: opened from the hall of doors -->
+  <div class="room room--games" id="room-games" role="dialog" aria-modal="true" aria-labelledby="room-games-title" hidden>
+    <div class="room__scroll">
+      <div class="container room__inner">
+        <header class="room__head">
+          <p class="eyebrow">Room 01 · 02 projects</p>
+          <h2 class="display" id="room-games-title" tabindex="-1">Games</h2>
+          <p class="lead">Two browser games built from scratch — one hand-drawn on Canvas, one full 3D — both playable offline.</p>
+        </header>
+        <div class="stack">
+          <article class="shot" style="--i:0">
+            <div class="shot__media"><div class="device device--monitor"><div class="device__screen"><img src="assets/work/nova-hop.jpg" alt="Nova Hop start screen with the blob picker and Play button" loading="lazy"></div><span class="device__neck"></span><span class="device__base"></span></div></div>
+            <div class="shot__text">
+              <p class="mono">Arcade game · Live</p>
+              <h3 class="h-md">Nova Hop</h3>
+              <p class="shot__sub">Sky-climbing platformer · nova-hop.vercel.app</p>
+              <p class="muted">A bouncy sky-climber with combos, power-ups, four zones and unlockable skins. Vanilla JS on Canvas, installable as an offline PWA on desktop, Android and iPhone.</p>
+              <ul class="shot__chips"><li class="chip chip--light">Canvas</li><li class="chip chip--light">Vanilla JS</li><li class="chip chip--light">PWA · offline</li><li class="chip chip--light">Web Audio</li></ul>
+              <div class="shot__links"><a class="btn btn--primary btn--sm" href="https://nova-hop.vercel.app/" target="_blank" rel="noopener">Play live ↗</a><a class="btn btn--link" href="https://github.com/nikhilrana2715/Doodle-Jump-website-Game" target="_blank" rel="noopener">Source →</a></div>
+            </div>
+          </article>
+          <article class="shot" style="--i:1">
+            <div class="shot__media"><div class="device device--monitor"><div class="device__screen"><img src="assets/work/funny-jump.jpg" alt="Funny Jump hero web-swinging over a grassy 3D level" loading="lazy"></div><span class="device__neck"></span><span class="device__base"></span></div></div>
+            <div class="shot__text">
+              <p class="mono">3D runner · Live</p>
+              <h3 class="h-md">Funny Jump</h3>
+              <p class="shot__sub">Cartoon 3D runner · running-game-91zr.vercel.app</p>
+              <p class="muted">A bright 3D runner with a live day-to-night cycle, web-swinging, power-ups, daily missions and a world leaderboard. Plays in the browser, as a Chrome extension or on Android.</p>
+              <ul class="shot__chips"><li class="chip chip--light">three.js</li><li class="chip chip--light">3D</li><li class="chip chip--light">Chrome extension</li><li class="chip chip--light">Android</li><li class="chip chip--light">Supabase</li></ul>
+              <div class="shot__links"><a class="btn btn--primary btn--sm" href="https://running-game-91zr.vercel.app/" target="_blank" rel="noopener">Play live ↗</a><a class="btn btn--link" href="https://github.com/nikhilrana2715/Running-Game" target="_blank" rel="noopener">Source →</a></div>
+            </div>
+          </article>
+        </div>
+        <p class="room__more"><a class="btn btn--link" href="https://github.com/nikhilrana2715" target="_blank" rel="noopener">All repos on GitHub →</a></p>
+      </div>
+    </div>
+    <button class="room__back btn btn--secondary btn--sm" type="button" data-back>← Back to the doors</button>
+  </div>
+  <div class="room room--web" id="room-web" role="dialog" aria-modal="true" aria-labelledby="room-web-title" hidden>
+    <div class="room__scroll">
+      <div class="container room__inner">
+        <header class="room__head">
+          <p class="eyebrow">Room 02 · 03 projects</p>
+          <h2 class="display" id="room-web-title" tabindex="-1">Web Apps</h2>
+          <p class="lead">Tools people use every day — a factory dashboard, a reminder app and a lock for your PC.</p>
+        </header>
+        <div class="stack">
+          <article class="shot" style="--i:0">
+            <div class="shot__media"><div class="device device--monitor"><div class="device__screen"><img src="assets/work/mma-dashboard.jpg" alt="Morning Meeting production dashboard with KPI tiles and machine priority list" loading="lazy"></div><span class="device__neck"></span><span class="device__base"></span></div></div>
+            <div class="shot__text">
+              <p class="mono">Production dashboard · Internal tool</p>
+              <h3 class="h-md">Morning Meeting App</h3>
+              <p class="shot__sub">Factory floor reporting · React + TypeScript</p>
+              <p class="muted">Upload the day's Excel report and get a live production dashboard: planning vs actual, efficiency, rejections and machines below target — filtered by shift and date, with saved meetings and SQLite history.</p>
+              <ul class="shot__chips"><li class="chip chip--light">React</li><li class="chip chip--light">TypeScript</li><li class="chip chip--light">Express</li><li class="chip chip--light">SQLite</li><li class="chip chip--light">Excel import</li></ul>
+              <div class="shot__links"><a class="btn btn--primary btn--sm" href="https://github.com/nikhilrana2715/MMA" target="_blank" rel="noopener">View on GitHub ↗</a></div>
+            </div>
+          </article>
+          <article class="shot" style="--i:1">
+            <div class="shot__media"><div class="device device--monitor"><div class="device__screen"><img src="assets/work/neumoremind.jpg" alt="NeumoRemind dark dashboard with views and categories sidebar" loading="lazy"></div><span class="device__neck"></span><span class="device__base"></span></div></div>
+            <div class="shot__text">
+              <p class="mono">Reminder PWA · Live</p>
+              <h3 class="h-md">NeumoRemind</h3>
+              <p class="shot__sub">Desktop reminders &amp; to-dos · neumoremind-pwa.web.app</p>
+              <p class="muted">A neumorphic reminder and to-do app for the PC: today, upcoming and overdue views, colour categories, push notifications and an installable Electron desktop build.</p>
+              <ul class="shot__chips"><li class="chip chip--light">PWA</li><li class="chip chip--light">Electron</li><li class="chip chip--light">Web Push</li><li class="chip chip--light">Firebase</li></ul>
+              <div class="shot__links"><a class="btn btn--primary btn--sm" href="https://neumoremind-pwa.web.app/" target="_blank" rel="noopener">Visit live site ↗</a><a class="btn btn--link" href="https://github.com/nikhilrana2715/PC-Reminder" target="_blank" rel="noopener">Source →</a></div>
+            </div>
+          </article>
+          <article class="shot" style="--i:2">
+            <div class="shot__media"><div class="device device--monitor"><div class="device__screen mock mock--lockpc" role="img" aria-label="Quick Lock unlock screen asking for the master password"><img class="mock__icon" src="assets/work/quick-lock-icon.png" alt="" loading="lazy"><b class="mock__title">Chrome is locked</b><span class="mock__sub">Enter your master password</span><span class="mock__field"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="mock__btn">Unlock</span></div><span class="device__neck"></span><span class="device__base"></span></div></div>
+            <div class="shot__text">
+              <p class="mono">Windows app · Security</p>
+              <h3 class="h-md">Quick Lock</h3>
+              <p class="shot__sub">App lock for your PC · Tauri 2 + Rust</p>
+              <p class="muted">Puts a master password on any Windows app, folder or file. A Rust watcher suspends protected apps the instant they launch; passwords are hashed with Argon2id, with a one-time recovery key.</p>
+              <ul class="shot__chips"><li class="chip chip--light">Tauri 2</li><li class="chip chip--light">Rust</li><li class="chip chip--light">React</li><li class="chip chip--light">TypeScript</li><li class="chip chip--light">Argon2id</li></ul>
+              <div class="shot__links"><a class="btn btn--primary btn--sm" href="https://github.com/nikhilrana2715/Locker" target="_blank" rel="noopener">View on GitHub ↗</a></div>
+            </div>
+          </article>
+        </div>
+        <p class="room__more"><a class="btn btn--link" href="https://github.com/nikhilrana2715" target="_blank" rel="noopener">All repos on GitHub →</a></p>
+      </div>
+    </div>
+    <button class="room__back btn btn--secondary btn--sm" type="button" data-back>← Back to the doors</button>
+  </div>
+  <div class="room room--apps" id="room-apps" role="dialog" aria-modal="true" aria-labelledby="room-apps-title" hidden>
+    <div class="room__scroll">
+      <div class="container room__inner">
+        <header class="room__head">
+          <p class="eyebrow">Room 03 · 02 projects</p>
+          <h2 class="display" id="room-apps-title" tabindex="-1">Apps</h2>
+          <p class="lead">Native and cross-platform apps that live on your phone and your desktop.</p>
+        </header>
+        <div class="stack">
+          <article class="shot" style="--i:0">
+            <div class="shot__media"><div class="device device--phone"><div class="device__screen mock mock--applock" role="img" aria-label="AppLock PIN screen with keypad"><span class="mock__ring"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><b class="mock__title">AppLock</b><span class="mock__sub">Enter PIN to open</span><span class="mock__dots"><i class="on"></i><i class="on"></i><i></i><i></i></span><span class="mock__keys"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i><i></i><i>0</i><i>⌫</i></span></div></div></div>
+            <div class="shot__text">
+              <p class="mono">Android app · APK</p>
+              <h3 class="h-md">AppLock</h3>
+              <p class="shot__sub">Privacy &amp; security utility · Kotlin</p>
+              <p class="muted">Locks the apps you choose behind fingerprint, PIN or pattern, with an instant overlay the moment they launch. Kotlin + Jetpack Compose (Material 3), MVVM and coroutines.</p>
+              <ul class="shot__chips"><li class="chip chip--light">Kotlin</li><li class="chip chip--light">Jetpack Compose</li><li class="chip chip--light">Biometrics</li><li class="chip chip--light">MVVM</li></ul>
+              <div class="shot__links"><a class="btn btn--primary btn--sm" href="https://github.com/nikhilrana2715/App-Lock" target="_blank" rel="noopener">View on GitHub ↗</a></div>
+            </div>
+          </article>
+          <article class="shot" style="--i:1">
+            <div class="shot__media"><div class="device device--phone"><div class="device__screen mock mock--zenith" role="img" aria-label="Zenith Task list with priorities and progress"><span class="mock__head"><b>Zenith Task</b><span class="mock__prog">25%</span></span><ul class="mock__list"><li class="done"><span class="mock__check"></span><span class="mock__task"><b>Submit MCA assignment</b><small>High</small></span><span class="mock__pri mock__pri--hi"></span></li><li class=""><span class="mock__check"></span><span class="mock__task"><b>Client call · 4:30 pm</b><small>Work</small></span><span class="mock__pri mock__pri--md"></span></li><li class=""><span class="mock__check"></span><span class="mock__task"><b>Revise DSA — graphs</b><small>Studies</small></span><span class="mock__pri mock__pri--md"></span></li><li class=""><span class="mock__check"></span><span class="mock__task"><b>Evening run</b><small>Personal</small></span><span class="mock__pri mock__pri--lo"></span></li></ul><span class="mock__alarm">Alarm · Client call in 10 min <em>Snooze</em></span></div></div></div>
+            <div class="shot__text">
+              <p class="mono">Task manager · Android + Windows</p>
+              <h3 class="h-md">Zenith Task</h3>
+              <p class="shot__sub">To-do list with alarms · TypeScript</p>
+              <p class="muted">A glassmorphic to-do and task manager with priorities, categories, synthesized alarm tones, snooze and a missed-alarm tracker. Ships as a web app, an Android app and a Windows desktop app.</p>
+              <ul class="shot__chips"><li class="chip chip--light">TypeScript</li><li class="chip chip--light">Vite</li><li class="chip chip--light">Capacitor</li><li class="chip chip--light">Electron</li><li class="chip chip--light">Web Audio</li></ul>
+              <div class="shot__links"><a class="btn btn--primary btn--sm" href="https://github.com/nikhilrana2715/Zenith-TO-DO-List" target="_blank" rel="noopener">View on GitHub ↗</a></div>
+            </div>
+          </article>
+        </div>
+        <p class="room__more"><a class="btn btn--link" href="https://github.com/nikhilrana2715" target="_blank" rel="noopener">All repos on GitHub →</a></p>
+      </div>
+    </div>
+    <button class="room__back btn btn--secondary btn--sm" type="button" data-back>← Back to the doors</button>
+  </div>
+  <!-- Modal / Ability card: loader → 3D trading card -->
+  <div class="vault" id="vault" role="dialog" aria-modal="true" aria-label="Nikhil Rana's ability card" hidden>
+    <canvas class="vault__embers" id="embers" aria-hidden="true"></canvas>
+    <button class="vault__close" id="vaultClose" type="button" aria-label="Close ability card">×</button>
+    <div class="vault__loader" id="vaultLoader" aria-live="polite">
+      <span class="vault__ring" aria-hidden="true"></span>
+      <p class="vault__name">Nikhil Rana</p>
+      <p class="vault__load"><span>Loading the card</span><b id="vaultPct">0</b></p>
+    </div>
+    <div class="vault__stage" id="vaultStage">
+      <div class="tcard" id="tcard" tabindex="0" role="img" aria-label="Ability card: Nikhil Rana, developer. Web development 90, app development 80, game development 85, problem solving 85. Based in Ranchi.">
+        <div class="tcard__inner" id="tcardInner">
+          <div class="tcard__face tcard__front">
+            <div class="tcard__body">
+              <p class="tcard__banner">Nikhil Rana</p>
+              <div class="tcard__photo"><img src="assets/img1.jpg" alt="" loading="lazy"><span class="tcard__foil"></span></div>
+              <p class="tcard__role">Developer · MCA student</p>
+              <ul class="tcard__stats"><li><span class="tcard__skill">Web Development</span><span class="tcard__dots" aria-hidden="true"><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i></i></span><b>90</b></li><li><span class="tcard__skill">App Development</span><span class="tcard__dots" aria-hidden="true"><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i></i><i></i></span><b>80</b></li><li><span class="tcard__skill">Game Development</span><span class="tcard__dots" aria-hidden="true"><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i></i><i></i></span><b>85</b></li><li><span class="tcard__skill">Problem Solving</span><span class="tcard__dots" aria-hidden="true"><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i></i><i></i></span><b>85</b></li></ul>
+              <div class="tcard__foot">
+                <span><small>Base</small>Ranchi</span>
+                <span><small>Mode</small>Full-time</span>
+                <span><small>Reply</small>&lt; 1 day</span>
+              </div>
+            </div>
+            <span class="tcard__holo" aria-hidden="true"></span>
+          </div>
+          <div class="tcard__face tcard__back" aria-hidden="true">
+            <div class="tcard__body tcard__body--back">
+              <span class="tcard__seal">NR</span>
+              <p class="tcard__banner">Ability card · 2026</p>
+              <ul class="tcard__stack"><li>HTML · CSS · JS · TypeScript</li><li>React · Node.js · Express</li><li>Python · Java · Kotlin · Rust</li><li>Canvas · three.js · Tauri</li></ul>
+              <p class="tcard__motto">Clean, useful things — shipped.</p>
+            </div>
+            <span class="tcard__holo" aria-hidden="true"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="vault__hint">Hover to tilt · Drag to rotate · Double-click to flip</p>
+  </div>
+  <div class="flash" id="flash" aria-hidden="true"></div>
+
+  <footer class="cta">
+    <div class="container">
+      <p class="cta__kicker"><span class="dot"></span>Available for new work</p>
+      <h2 class="cta__title">Need something built?<br><span>Let's make it happen.</span></h2>
+      <p class="cta__text">Websites, web apps and dashboards. Tell me what you need and I'll get back to you within a day.</p>
+      <div class="hero__btns">
+        <a href="#contact" class="btn btn--light">Hire me <span class="btn__arrow" aria-hidden="true">→</span></a>
+        <a href="#work" class="btn btn--ghost">See my work</a>
+      </div>
+
+      <div class="cta__cols">
+        <div>
+          <p class="cta__label">Work</p>
+          <ul><li><a href="#work">Projects</a></li><li><a href="#skills">Skills</a></li><li><a href="#certs">Certifications</a></li></ul>
+        </div>
+        <div>
+          <p class="cta__label">Navigate</p>
+          <ul><li><a href="#top">Home</a></li><li><a href="#story">My story</a></li><li><a href="#contact">Contact</a></li></ul>
+        </div>
+        <div>
+          <p class="cta__label">Elsewhere</p>
+          <ul><li><a href="https://github.com/nikhilrana2715" target="_blank" rel="noopener">GitHub</a></li><li><a href="https://www.linkedin.com/in/nikhilrana27" target="_blank" rel="noopener">LinkedIn</a></li><li><a href="https://instagram.com/nik.hil.21" target="_blank" rel="noopener">Instagram</a></li></ul>
+        </div>
+        <div>
+          <p class="cta__label">Status</p>
+          <ul><li>Job + MCA, open to freelance</li><li>Ranchi, India</li><li>Local time <span class="js-time">--:--</span></li></ul>
+        </div>
+      </div>
+
+      <div class="cta__bottom">
+        <p>© <span id="year">2026</span> Nikhil Rana. Designed &amp; built in Ranchi.</p>
+        <a href="#top">Back to top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js?v=3.5"></script>
 </body>
-
-
 </html>

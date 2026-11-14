@@ -1,0 +1,146 @@
+/* Nikhil Rana Portfolio — design tokens v2.0
+   Derived from therishithakor.com-design.md. Components reference these only. */
+:root {
+  /* color */
+  --color-primary: #1A1818;
+  --color-secondary: #A4552C;
+  --color-tertiary: #D5CDCA;
+  --color-neutral: #E8E4E0;
+  --color-surface: #F5F1EC;
+  --color-on-surface: #1A1818;
+  --color-on-primary: #E8E4E0;
+  --color-muted: #7D7773;
+  --color-border: #DCD5D0;
+  --color-overlay: #000000E6;
+  --color-success: #1F7A5A;
+  --color-error: #B84B4B;
+
+  /* type */
+  --font: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-display: clamp(44px, 7.4vw, 76px);
+  --fs-lg: clamp(36px, 5.4vw, 54.4px);
+  --fs-md: clamp(26px, 3.4vw, 34.4px);
+  --fs-sm: 18px;
+  --fs-body-lg: 18px;
+  --fs-body: 16px;
+  --fs-body-sm: 14px;
+  --fs-label-sm: 12px;
+  --fs-caption: 11px;
+
+  /* space */
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 28px;
+  --space-lg: 48px;
+  --space-xl: 112px;
+
+  /* radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* elevation */
+  --shadow-soft: 0 1px 2px rgba(26, 24, 24, .04), 0 8px 24px rgba(26, 24, 24, .06);
+  --shadow-lift: 0 2px 6px rgba(26, 24, 24, .05), 0 30px 60px -12px rgba(26, 24, 24, .18);
+
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --container: 1200px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-primary: #EDE7E1;
+    --color-secondary: #D07A4C;
+    --color-tertiary: #3A3533;
+    --color-neutral: #171514;
+    --color-surface: #211E1C;
+    --color-on-surface: #EDE7E1;
+    --color-on-primary: #171514;
+    --color-muted: #A39C97;
+    --color-border: #332E2B;
+    --shadow-soft: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .3);
+    --shadow-lift: 0 2px 6px rgba(0, 0, 0, .3), 0 30px 60px -12px rgba(0, 0, 0, .55);
+  }
+}
+/* v2.1 additions */
+:root {
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --ink-fixed: #1A1818;      /* CTA footer: always dark */
+  --paper-fixed: #EDE7E1;
+  --glow-opacity: .55;
+  --stripe: rgba(26, 24, 24, .028);
+}
+
+:root[data-theme="dark"] {
+  --glow-opacity: .22;
+  --stripe: rgba(255, 255, 255, .025);
+  --ink-fixed: #0F0E0D;
+  --color-primary: #EDE7E1;
+  --color-secondary: #D07A4C;
+  --color-tertiary: #3A3533;
+  --color-neutral: #171514;
+  --color-surface: #211E1C;
+  --color-on-surface: #EDE7E1;
+  --color-on-primary: #171514;
+  --color-muted: #A39C97;
+  --color-border: #332E2B;
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .3);
+  --shadow-lift: 0 2px 6px rgba(0, 0, 0, .3), 0 30px 60px -12px rgba(0, 0, 0, .55);
+}
+
+/* v2.2 — Card / Door (Work section). Material colors, used only by .door */
+:root {
+  --door-navy: #24324F;
+  --door-plum: #4A3441;
+  --door-sage: #7A8B74;
+  --door-rust: #A4552C;
+  --door-teal: #2F5755;
+  --door-ochre: #A87A34;
+  --door-frame: #F4F0EB;
+  --brass-hi: #EBD49A;
+  --brass: #C9A45C;
+  --brass-lo: #8E6C2E;
+  --brass-ink: #3B2A12;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --door-frame: #2B2724; }
+}
+:root[data-theme="dark"] { --door-frame: #2B2724; }
+
+/* v2.3 — hall of doors + rooms */
+:root {
+  --door-glow: #FFF6E6;
+  --lamp: rgba(255, 226, 190, .55);
+  --room-games: #F1E4DA;
+  --room-web: #E2E6EC;
+  --room-apps: #E5EADF;
+  --mock-night: #15131F;
+  --mock-porcelain: #F8FAFC;
+  --mock-indigo: #5B5BD6;
+  --mock-violet: #7C5CE6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --lamp: rgba(255, 200, 140, .12); --room-games: #241C18; --room-web: #1A1D23; --room-apps: #1C211B; }
+}
+:root[data-theme="dark"] { --lamp: rgba(255, 200, 140, .12); --room-games: #241C18; --room-web: #1A1D23; --room-apps: #1C211B; }
+
+/* v2.4 — hero flip notepad (paper stays light in both themes) */
+:root {
+  --paper-note: #FFFBF3;
+  --ring: #9A958F;
+}
+
+/* v2.5 — device bezel edge (visible on dark cards) */
+:root { --bezel-edge: transparent; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bezel-edge: rgba(255, 255, 255, .14); } }
+:root[data-theme="dark"] { --bezel-edge: rgba(255, 255, 255, .14); }
+
+/* v2.8 — ability card vault (always dark stage, light card) */
+:root {
+  --vault-bg: #0B0806;
+  --vault-glow: rgba(120, 50, 10, .45);
+  --card-mauve: #A3878A;
+  --card-mauve-deep: #7C6367;
+}
