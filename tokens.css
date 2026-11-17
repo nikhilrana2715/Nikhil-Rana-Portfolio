@@ -137,10 +137,17 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bezel-edge: rgba(255, 255, 255, .14); } }
 :root[data-theme="dark"] { --bezel-edge: rgba(255, 255, 255, .14); }
 
-/* v2.8 — ability card vault (always dark stage, light card) */
+/* v4.1 — ability card vault: always-dark studio stage, ink + brass card */
 :root {
-  --vault-bg: #0B0806;
-  --vault-glow: rgba(120, 50, 10, .45);
-  --card-mauve: #A3878A;
-  --card-mauve-deep: #7C6367;
+  --vault-bg: #0D0B0A;
+  --vault-glow: rgba(201, 164, 92, .16);   /* brass spotlight */
+  --vault-line: rgba(237, 231, 225, .10);  /* hairlines, outlined type */
+  --vault-text-2: rgba(237, 231, 225, .62);
+  --vault-text-3: rgba(237, 231, 225, .40);
+  --card-ink: #151312;
+  --card-ink-2: #1E1B19;
+  /* v4.6 hero sticker portrait (same in light + dark) */
+  --portrait-panel: var(--card-ink);
+  --portrait-edge: rgba(201, 164, 92, .38); /* brass hairline + outlined name */
+  --shadow-sticker: 0 10px 14px rgba(0, 0, 0, .28);
 }

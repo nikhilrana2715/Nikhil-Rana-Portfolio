@@ -7,13 +7,13 @@
   <meta name="description" content="Nikhil Rana — developer from Ranchi, India. Web apps, games and Android apps; developer at MRS Bearings and MCA student.">
   <meta property="og:title" content="Nikhil Rana — Developer">
   <meta property="og:description" content="Developer building web apps, games and Android apps — pick a door and step into the work.">
-  <meta property="og:image" content="assets/img1.jpg">
+  <meta property="og:image" content="assets/og.jpg">
   <link rel="icon" href="assets/img7.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="tokens.css?v=3.7">
-  <link rel="stylesheet" href="style.css?v=3.7">
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css?v=4.8">
+  <link rel="stylesheet" href="style.css?v=4.8">
 </head>
 <body id="top">
   <a class="skip" href="#main">Skip to content</a>
@@ -33,8 +33,8 @@
         </ul>
       </nav>
       <div class="nav__actions">
-        <div class="clock-pill" aria-label="Local time in Ranchi">
-          <span class="muted">Local time</span><b class="js-time">--:--</b><span class="clock-pill__sep">·</span><span class="js-date">--</span>
+        <div class="clock-pill" aria-label="Your local time" data-loc-label>
+          <span class="muted js-city">Local time</span><b class="js-time">--:--</b><span class="clock-pill__sep">·</span><span class="js-date">--</span>
         </div>
         <a href="#contact" class="btn btn--primary btn--sm nav__cta">Let's talk</a>
         <button class="icon-btn nav__burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
@@ -44,9 +44,9 @@
     </div>
   </header>
 
-  <!-- Pull cord: drag down (or click / Enter) to switch the lights -->
+  <!-- Pull cord: physics rope on canvas + draggable bob. Pull down (or click / Enter) to switch the lights -->
+  <canvas class="cord-canvas" id="cordCanvas" aria-hidden="true"></canvas>
   <button class="cord" id="cord" type="button" aria-label="Pull cord to toggle dark mode" aria-pressed="false">
-    <span class="cord__rope"></span>
     <span class="cord__cap"></span>
     <span class="cord__bob"></span>
   </button>
@@ -76,10 +76,13 @@
         </div>
 
         <div class="hero__visual reveal">
-          <div class="meta-pill"><span class="js-time">--:--</span> in Ranchi, IN</div>
+          <div class="meta-pill"><span class="js-time">--:--</span> in <span class="js-loc">your city</span></div>
           <figure class="portrait" id="portrait">
-            <img class="portrait__base" src="assets/img1.jpg" alt="Portrait of Nikhil Rana" width="1237" height="1237">
-            <img class="portrait__color" src="assets/img1.jpg" alt="" aria-hidden="true" width="1237" height="1237">
+            <span class="portrait__name" aria-hidden="true"><b>NIKHIL</b><i>RANA</i></span>
+            <span class="portrait__label portrait__label--l" aria-hidden="true">NR / 001</span>
+            <span class="portrait__label portrait__label--r" aria-hidden="true">Dev · '26</span>
+            <img class="portrait__base" src="assets/portrait.webp" alt="Portrait of Nikhil Rana in a white shirt, black tie and aviator sunglasses" width="812" height="1075" fetchpriority="high">
+            <img class="portrait__color" src="assets/portrait.webp" alt="" aria-hidden="true" width="812" height="1075">
           </figure>
           <div class="ability" id="ability">
             <button class="chip chip--dark ability__pill" id="abilityBtn" type="button" aria-haspopup="dialog" aria-controls="vault">
@@ -95,7 +98,7 @@
       <div class="container about">
         <p class="eyebrow reveal">About</p>
         <div class="about__body">
-          <h2 class="h-lg reveal">I wrote my first Python script at 16. I haven't stopped building since.</h2>
+          <h2 class="h-lg reveal">I wrote my first Python script at 20. I haven't stopped building since.</h2>
           <div class="about__cols reveal">
             <p>Since February 2026 I've been a developer at MRS Bearings Pvt. Ltd., building in-house software for real users — like a production dashboard that turns the day's Excel report into a live morning-meeting view. I finished my BCA in 2026 and I'm now doing my MCA (2026–2028) alongside the job.</p>
             <p>Outside work I build games and apps: a Canvas arcade game, a 3D runner, an Android app lock and a Windows app lock in Rust. Every project is a way to learn a new tool by shipping something people can actually use.</p>
@@ -207,7 +210,7 @@
             <p class="tl__org">Bachelor of Computer Applications · Ranchi, Jharkhand</p>
             <ul class="tl__pts">
               <li>Foundations in data structures, algorithms, web technologies, Java and Python.</li>
-              <li>Started with my first Python script at 16; hackathons and certifications followed.</li>
+              <li>Started with my first Python script at 20; hackathons and certifications followed.</li>
             </ul>
           </li>
         </ol>
@@ -319,12 +322,25 @@
           <p class="eyebrow">Certifications</p>
           <h2 class="h-lg">Always learning.</h2>
         </div>
+        <!-- TODO: real years from Nikhil (replace "—") -->
         <ol class="certs">
-          <li class="cert reveal"><span class="cert__year">2024</span><div><h3 class="h-sm">Frontend Development</h3><p class="muted body-sm">Advanced techniques for responsive, interactive web apps.</p></div></li>
-          <li class="cert reveal"><span class="cert__year">2024</span><div><h3 class="h-sm">Web Development Fundamentals</h3><p class="muted body-sm">Core web technologies — HTML, CSS and JavaScript.</p></div></li>
-          <li class="cert reveal"><span class="cert__year">2023</span><div><h3 class="h-sm">Python Programming</h3><p class="muted body-sm">Python programming and application development.</p></div></li>
-          <li class="cert reveal"><span class="cert__year">2023</span><div><h3 class="h-sm">Game Design Principles</h3><p class="muted body-sm">Fundamentals of game design for web platforms.</p></div></li>
+          <li class="cert reveal"><span class="cert__year">—</span><div><h3 class="h-sm">Python Programming with Flask</h3><p class="muted body-sm">Python fundamentals and building web apps with the Flask framework.</p></div></li>
+          <li class="cert reveal"><span class="cert__year">—</span><div><h3 class="h-sm">Web Development</h3><p class="muted body-sm">Core web technologies — HTML, CSS and JavaScript.</p></div></li>
+          <li class="cert reveal"><span class="cert__year">—</span><div><h3 class="h-sm">Cloud Services</h3><p class="muted body-sm">Cloud computing basics — services, storage and hosting.</p></div></li>
+          <li class="cert reveal"><span class="cert__year">—</span><div><h3 class="h-sm">Communication Skills</h3><p class="muted body-sm">Professional communication for the workplace.</p></div></li>
         </ol>
+        <div class="learning reveal">
+          <p class="eyebrow">Currently learning</p>
+          <p class="learning__lead">Full-stack — building software and web applications end to end.</p>
+          <ul class="learning__list">
+            <li class="chip chip--light">Frontend</li>
+            <li class="chip chip--light">Backend</li>
+            <li class="chip chip--light">Databases</li>
+            <li class="chip chip--light">Deployment</li>
+            <li class="chip chip--light">Cloud services</li>
+            <li class="chip chip--light">Hosting</li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -494,7 +510,16 @@
   </div>
   <!-- Modal / Ability card: loader → 3D trading card -->
   <div class="vault" id="vault" role="dialog" aria-modal="true" aria-label="Nikhil Rana's ability card" hidden>
-    <canvas class="vault__embers" id="embers" aria-hidden="true"></canvas>
+    <!-- studio backdrop: spotlight follows cursor, slow outlined name, grain, spec-sheet corners -->
+    <div class="vault__bg" aria-hidden="true">
+      <div class="vault__marquee"><span>Nikhil Rana — Developer — Nikhil Rana — Developer — </span><span>Nikhil Rana — Developer — Nikhil Rana — Developer — </span></div>
+      <div class="vault__marquee vault__marquee--rev"><span>Web · Apps · Games · Python · Web · Apps · Games · Python · </span><span>Web · Apps · Games · Python · Web · Apps · Games · Python · </span></div>
+      <span class="vault__spot"></span>
+      <span class="vault__grain"></span>
+      <span class="vault__corner vault__corner--tl">NR / 001</span>
+      <span class="vault__corner vault__corner--bl"><span class="js-coords">--° · --°</span> · <span class="js-city">--</span></span>
+      <span class="vault__corner vault__corner--br"><span class="js-time">--:--</span> <span class="js-tz">--</span></span>
+    </div>
     <button class="vault__close" id="vaultClose" type="button" aria-label="Close ability card">×</button>
     <div class="vault__loader" id="vaultLoader" aria-live="polite">
       <span class="vault__ring" aria-hidden="true"></span>
@@ -502,35 +527,63 @@
       <p class="vault__load"><span>Loading the card</span><b id="vaultPct">0</b></p>
     </div>
     <div class="vault__stage" id="vaultStage">
-      <div class="tcard" id="tcard" tabindex="0" role="img" aria-label="Ability card: Nikhil Rana, developer. Web development 90, app development 80, game development 85, problem solving 85. Based in Ranchi.">
-        <div class="tcard__inner" id="tcardInner">
-          <div class="tcard__face tcard__front">
-            <div class="tcard__body">
-              <p class="tcard__banner">Nikhil Rana</p>
-              <div class="tcard__photo"><img src="assets/img1.jpg" alt="" loading="lazy"><span class="tcard__foil"></span></div>
-              <p class="tcard__role">Developer · MCA student</p>
-              <ul class="tcard__stats"><li><span class="tcard__skill">Web Development</span><span class="tcard__dots" aria-hidden="true"><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i></i></span><b>90</b></li><li><span class="tcard__skill">App Development</span><span class="tcard__dots" aria-hidden="true"><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i></i><i></i></span><b>80</b></li><li><span class="tcard__skill">Game Development</span><span class="tcard__dots" aria-hidden="true"><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i></i><i></i></span><b>85</b></li><li><span class="tcard__skill">Problem Solving</span><span class="tcard__dots" aria-hidden="true"><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i class=on></i><i></i><i></i></span><b>85</b></li></ul>
+      <div class="vault__cardwrap">
+        <div class="tcard" id="tcard" tabindex="0" role="img" aria-label="Ability card: Nikhil Rana, developer. Web development 90, app development 80, game development 85, problem solving 85. Based in Ranchi. Press Enter to flip.">
+          <div class="tcard__inner" id="tcardInner">
+            <div class="tcard__face tcard__front">
+              <div class="tcard__photo">
+                <img src="assets/card.jpg" alt="" decoding="async">
+                <span class="tcard__tag tcard__tag--l">NR</span>
+                <span class="tcard__tag tcard__tag--r">No. 001 · 2026</span>
+                <div class="tcard__id">
+                  <p class="tcard__name">Nikhil Rana</p>
+                  <p class="tcard__role">Developer · MCA student</p>
+                </div>
+              </div>
+              <ul class="tcard__stats">
+                <li style="--v:90"><span>Web development</span><i></i><b>90</b></li>
+                <li style="--v:80"><span>App development</span><i></i><b>80</b></li>
+                <li style="--v:85"><span>Game development</span><i></i><b>85</b></li>
+                <li style="--v:85"><span>Problem solving</span><i></i><b>85</b></li>
+              </ul>
               <div class="tcard__foot">
                 <span><small>Base</small>Ranchi</span>
                 <span><small>Mode</small>Full-time</span>
                 <span><small>Reply</small>&lt; 1 day</span>
               </div>
+              <span class="tcard__holo" aria-hidden="true"></span>
             </div>
-            <span class="tcard__holo" aria-hidden="true"></span>
-          </div>
-          <div class="tcard__face tcard__back" aria-hidden="true">
-            <div class="tcard__body tcard__body--back">
+            <div class="tcard__face tcard__back" aria-hidden="true">
               <span class="tcard__seal">NR</span>
-              <p class="tcard__banner">Ability card · 2026</p>
-              <ul class="tcard__stack"><li>HTML · CSS · JS · TypeScript</li><li>React · Node.js · Express</li><li>Python · Java · Kotlin · Rust</li><li>Canvas · three.js · Tauri</li></ul>
-              <p class="tcard__motto">Clean, useful things — shipped.</p>
+              <p class="tcard__label">Stack</p>
+              <ul class="tcard__stack"><li>HTML · CSS · JavaScript · TypeScript</li><li>React · Node.js · Express</li><li>Python · Flask · Java · Kotlin · Rust</li><li>Canvas · three.js · Tauri</li></ul>
+              <p class="tcard__motto">“Clean, useful things — shipped.”</p>
+              <span class="tcard__holo" aria-hidden="true"></span>
             </div>
-            <span class="tcard__holo" aria-hidden="true"></span>
           </div>
         </div>
+        <span class="vault__floor" aria-hidden="true"></span>
+        <p class="vault__hint">Drag to rotate · Double-click to flip</p>
       </div>
+
+      <!-- Details panel beside the card -->
+      <aside class="vault__panel" aria-label="Profile details">
+        <p class="vault__eyebrow"><span class="vault__dot"></span>Working full-time · MRS Bearings</p>
+        <h2 class="vault__title">Nikhil Rana</h2>
+        <p class="vault__lead">Developer at MRS Bearings, doing my MCA alongside. I build web apps, Android apps and small games — and ship them.</p>
+        <dl class="vault__facts">
+          <div><dt>Now</dt><dd>Developer · MRS Bearings Pvt. Ltd. (since Feb 2026)</dd></div>
+          <div><dt>Study</dt><dd>MCA, 2026 – 2028 · BCA done</dd></div>
+          <div><dt>Certified</dt><dd>Python with Flask · Web Development · Cloud Services · Communication Skills</dd></div>
+          <div><dt>Shipped</dt><dd>7+ projects · 2 games · 3 platforms</dd></div>
+        </dl>
+        <div class="vault__ctas">
+          <a class="vbtn vbtn--primary" href="https://drive.google.com/file/d/1fOhgtM-z2Djm2z56_rHmaTW-F3Zb-YpO/view" target="_blank" rel="noopener">View resume ↗</a>
+          <a class="vbtn" href="#contact" data-vault-close>Get in touch</a>
+          <a class="vbtn vbtn--ghost" href="https://github.com/nikhilrana2715" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </aside>
     </div>
-    <p class="vault__hint">Hover to tilt · Drag to rotate · Double-click to flip</p>
   </div>
   <div class="flash" id="flash" aria-hidden="true"></div>
 
@@ -559,7 +612,7 @@
         </div>
         <div>
           <p class="cta__label">Status</p>
-          <ul><li>Job + MCA, open to freelance</li><li>Ranchi, India</li><li>Local time <span class="js-time">--:--</span></li></ul>
+          <ul><li>Job + MCA, open to freelance</li><li>Ranchi, India</li><li>Your time <span class="js-time">--:--</span> · <span class="js-city">--</span></li></ul>
         </div>
       </div>
 
@@ -570,6 +623,6 @@
     </div>
   </footer>
 
-  <script src="script.js?v=3.7"></script>
+  <script src="script.js?v=4.8"></script>
 </body>
 </html>

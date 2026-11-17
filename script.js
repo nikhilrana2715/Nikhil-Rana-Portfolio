@@ -32,40 +32,184 @@
   };
   applyTheme(getStored() || 'light');
 
-  /* ---------- Pull cord: drag down past threshold, or click / Enter ---------- */
-  if (cord) {
-    const MAX = 90, THRESHOLD = 42;
-    let startY = 0, pulling = false, moved = false;
-    cord.addEventListener('pointerdown', (e) => {
-      pulling = true; moved = false; startY = e.clientY;
-      cord.setPointerCapture(e.pointerId);
-      cord.classList.add('is-dragging');
-    });
-    cord.addEventListener('pointermove', (e) => {
-      if (!pulling) return;
-      const d = Math.max(0, Math.min(MAX, e.clientY - startY));
-      if (d > 4) moved = true;
-      // rubber-band resistance
-      cord.style.setProperty('--pull', `${d * (1 - d / (MAX * 2.2))}px`);
-    });
-    const release = (e) => {
-      if (!pulling) return;
-      pulling = false;
-      const d = e.clientY - startY;
-      cord.classList.remove('is-dragging');
-      cord.style.setProperty('--pull', '0px');
-      if (moved && d >= THRESHOLD) toggleTheme();
-      else if (!moved) { // plain click: quick tug animation + toggle
-        cord.style.setProperty('--pull', '28px');
-        setTimeout(() => cord.style.setProperty('--pull', '0px'), 120);
-        toggleTheme();
+  /* ---------- Pull cord: verlet rope physics ----------
+     - mouse passing through the rope pushes it aside
+     - grab the bob and swing / throw it anywhere; let go and it swings back
+     - pull it down past its length (stretch >= PULL) and release -> lights toggle
+     - plain click / Enter / Space -> tug + toggle */
+  const canvas = document.getElementById('cordCanvas');
+  if (cord && canvas) {
+    const ctx = canvas.getContext('2d');
+    const N = 20;                 // rope points
+    const PULL = 34;              // stretch (px) needed to toggle
+    const STRETCH_MAX = 80;       // rubber-band limit when pulling
+    const PUSH_R = 16;            // hover push radius
+    const GRAVITY = 1500;         // px/s^2
+    const DAMP = reduceMotion ? 0.86 : 0.985;
+    let pts = [], seg = 10, anchor = { x: 0, y: -4 }, total = 0;
+    let dpr = 1, W = 0, H = 0;
+    let drag = null;              // { id, ox, oy, sx, sy, moved, maxStretch }
+    let mouse = null, raf = 0, still = 0, last = 0;
+
+    const layout = () => {
+      // use the canvas's real CSS box (excludes scrollbar) so rope + bob share one coordinate space
+      W = canvas.clientWidth || document.documentElement.clientWidth;
+      H = canvas.clientHeight || document.documentElement.clientHeight;
+      dpr = Math.min(2, devicePixelRatio || 1);
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      const mobile = W <= 860;
+      const right = mobile ? 64 : Math.min(96, Math.max(64, W * 0.06));
+      const len = mobile ? 72 : Math.min(230, Math.max(110, H * 0.26));
+      const ax = W - right - 22;
+      const dx = ax - anchor.x;
+      anchor = { x: ax, y: -4 };
+      seg = len / (N - 1); total = len;
+      if (!pts.length) {
+        pts = Array.from({ length: N }, (_, i) => ({ x: ax, y: -4 + i * seg, px: ax, py: -4 + i * seg }));
+      } else {
+        pts.forEach(p => { p.x += dx; p.px += dx; });
       }
     };
-    cord.addEventListener('pointerup', release);
-    cord.addEventListener('pointercancel', () => { pulling = false; cord.classList.remove('is-dragging'); cord.style.setProperty('--pull', '0px'); });
-    cord.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTheme(); }
+
+    const clampStretch = (x, y) => {
+      const dx = x - anchor.x, dy = y - anchor.y, d = Math.hypot(dx, dy) || 1;
+      if (d <= total) return { x, y, s: 0 };
+      const ex = d - total;
+      const s = STRETCH_MAX * (1 - Math.exp(-ex / STRETCH_MAX)); // rubber band
+      const k = (total + s) / d;
+      return { x: anchor.x + dx * k, y: anchor.y + dy * k, s };
+    };
+
+    // only a (roughly) downward pull counts as switching the light — sideways swings don't
+    const pullAmount = (x, y) => {
+      const dx = x - anchor.x, dy = y - anchor.y, d = Math.hypot(dx, dy) || 1;
+      return dy / d > 0.85 ? clampStretch(x, y).s : 0; // within ~32° of straight down
+    };
+
+    const step = (dt) => {
+      const g = GRAVITY * dt * dt;
+      for (let i = 1; i < N; i++) {
+        const p = pts[i];
+        let vx = (p.x - p.px) * DAMP, vy = (p.y - p.py) * DAMP;
+        const vmax = 60; // cap per-step velocity (keeps throws sane)
+        const v = Math.hypot(vx, vy); if (v > vmax) { vx *= vmax / v; vy *= vmax / v; }
+        p.px = p.x; p.py = p.y;
+        p.x += vx; p.y += vy + g * (i === N - 1 ? 2.2 : 1); // bob is heavier
+      }
+      const end = pts[N - 1];
+      let target = null;
+      if (drag) {
+        target = clampStretch(drag.tx, drag.ty);
+        drag.maxStretch = Math.max(drag.maxStretch, pullAmount(drag.tx, drag.ty));
+      }
+      // hover push (mouse only, not while dragging)
+      if (mouse && !drag && !reduceMotion) {
+        for (let i = 2; i < N; i++) {
+          const p = pts[i], dx = p.x - mouse.x, dy = p.y - mouse.y, d = Math.hypot(dx, dy);
+          if (d < PUSH_R && d > 0.01) { const k = (PUSH_R - d) / d * 0.5; p.x += dx * k; p.y += dy * k * 0.3; }
+        }
+      }
+      // constraints
+      const len = drag ? seg * (1 + (target.s / total)) : seg; // stretch evenly while pulling
+      for (let it = 0; it < 14; it++) {
+        pts[0].x = anchor.x; pts[0].y = anchor.y;
+        if (target) { end.x = target.x; end.y = target.y; }
+        for (let i = 0; i < N - 1; i++) {
+          const a = pts[i], b = pts[i + 1];
+          const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.0001;
+          const diff = (d - len) / d;
+          const aFixed = i === 0, bFixed = !!target && i + 1 === N - 1;
+          const wa = aFixed ? 0 : (bFixed ? 1 : 0.5), wb = bFixed ? 0 : (aFixed ? 1 : 0.5);
+          a.x += dx * diff * wa; a.y += dy * diff * wa;
+          b.x -= dx * diff * wb; b.y -= dy * diff * wb;
+        }
+      }
+      if (target) { end.x = target.x; end.y = target.y; }
+    };
+
+    const draw = () => {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      const path = () => {
+        ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < N - 1; i++) {
+          const mx = (pts[i].x + pts[i + 1].x) / 2, my = (pts[i].y + pts[i + 1].y) / 2;
+          ctx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
+        }
+        ctx.lineTo(pts[N - 1].x, pts[N - 1].y);
+      };
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.save(); ctx.translate(2, 3); path(); ctx.strokeStyle = 'rgba(0,0,0,.14)'; ctx.lineWidth = 4; ctx.stroke(); ctx.restore(); // soft shadow
+      path(); ctx.strokeStyle = '#7A6A50'; ctx.lineWidth = 4; ctx.stroke();              // solid outline: always visible, never gappy
+      path(); ctx.strokeStyle = '#CDB894'; ctx.lineWidth = 2.4; ctx.stroke();            // light core
+      ctx.setLineDash([2.5, 2.5]); path(); ctx.strokeStyle = 'rgba(122,106,80,.75)'; ctx.lineWidth = 2.4; ctx.stroke(); ctx.setLineDash([]); // twist
+      // bob follows the last segment's angle
+      const a = pts[N - 2], b = pts[N - 1];
+      const ang = -Math.atan2(b.x - a.x, b.y - a.y);
+      cord.style.transform = `translate(${b.x - 22}px, ${b.y - 4}px) rotate(${ang}rad)`; // cap overlaps rope end
+    };
+
+    const energy = () => {
+      let e = 0; for (let i = 1; i < N; i++) e += Math.abs(pts[i].x - pts[i].px) + Math.abs(pts[i].y - pts[i].py);
+      return e;
+    };
+
+    const tick = (t) => {
+      const dt = Math.min(1 / 30, (t - last) / 1000 || 1 / 60); last = t;
+      const sub = 2; for (let s = 0; s < sub; s++) step(dt / sub);
+      draw();
+      // sleep when at rest
+      if (!drag && !mouse && energy() < 0.05) { if (++still > 20) { raf = 0; return; } } else still = 0;
+      raf = requestAnimationFrame(tick);
+    };
+    const wake = () => { still = 0; if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); } };
+
+    const tug = () => { // click / keyboard: yank the bob down, then toggle
+      const end = pts[N - 1]; end.py = end.y - 22;
+      for (let i = N - 6; i < N - 1; i++) pts[i].py = pts[i].y - 10;
+      toggleTheme(); wake();
+    };
+
+    cord.addEventListener('pointerdown', (e) => {
+      const end = pts[N - 1];
+      drag = { id: e.pointerId, ox: e.clientX - end.x, oy: e.clientY - end.y, sx: e.clientX, sy: e.clientY, tx: end.x, ty: end.y, moved: false, maxStretch: 0 };
+      cord.setPointerCapture(e.pointerId);
+      cord.classList.add('is-dragging');
+      wake();
     });
+    cord.addEventListener('pointermove', (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      drag.tx = e.clientX - drag.ox; drag.ty = e.clientY - drag.oy;
+      drag.maxStretch = Math.max(drag.maxStretch, pullAmount(drag.tx, drag.ty));
+      if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 5) drag.moved = true;
+    });
+    const release = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const { moved, maxStretch } = drag;
+      drag = null; cord.classList.remove('is-dragging');
+      if (!moved) tug();
+      else if (maxStretch >= PULL) toggleTheme();
+      wake();
+    };
+    cord.addEventListener('pointerup', release);
+    cord.addEventListener('pointercancel', (e) => { if (drag && e.pointerId === drag.id) { drag = null; cord.classList.remove('is-dragging'); wake(); } });
+    cord.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tug(); }
+    });
+
+    // mouse brushing through the rope
+    window.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || drag) return;
+      const near = e.clientY < total + 120 && Math.abs(e.clientX - anchor.x) < total + 60;
+      mouse = near ? { x: e.clientX, y: e.clientY } : null;
+      if (near) wake();
+    }, { passive: true });
+    document.addEventListener('mouseout', (e) => { if (!e.relatedTarget) mouse = null; });
+
+    layout(); draw(); cord.classList.add('is-ready');
+    // small settle swing on load so it looks alive
+    if (!reduceMotion) { pts[N - 1].px -= 6; wake(); }
+    window.addEventListener('resize', () => { layout(); wake(); });
   }
 
   /* ---------- Mobile nav ---------- */
@@ -110,17 +254,68 @@
   }, { rootMargin: '-45% 0px -50% 0px' });
   sections.forEach(s => spy.observe(s));
 
-  /* ---------- Local time + date (Ranchi, IST) ---------- */
-  const timeFmt = new Intl.DateTimeFormat('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
-  const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
+  /* ---------- Visitor's local time + date + location ----------
+     Time uses the visitor's own timezone. Location: first a guess from the
+     timezone name (instant, offline), then city/country/coords from an IP
+     lookup (get.geojs.io, no key, no permission prompt). Cached per session.
+     Fills .js-time .js-date .js-tz .js-loc .js-city .js-coords */
+  let tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  let timeFmt, dateFmt, tzFmt;
+  const makeFmts = () => {
+    try {
+      timeFmt = new Intl.DateTimeFormat('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: tz });
+      dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: tz });
+      tzFmt = new Intl.DateTimeFormat('en-IN', { timeZoneName: 'short', timeZone: tz });
+    } catch (e) { tz = 'UTC'; makeFmts(); }
+  };
+  makeFmts();
+  const setAll = (sel, txt) => document.querySelectorAll(sel).forEach(el => { el.textContent = txt; });
   const tick = () => {
     const now = new Date();
-    const t = timeFmt.format(now).replace(' ', '').toLowerCase();
-    document.querySelectorAll('.js-time').forEach(el => { el.textContent = t; });
-    document.querySelectorAll('.js-date').forEach(el => { el.textContent = dateFmt.format(now).replace(/ (\d{4})$/, ', $1'); });
+    setAll('.js-time', timeFmt.format(now).replace(' ', '').toLowerCase());
+    setAll('.js-date', dateFmt.format(now).replace(/ (\d{4})$/, ', $1'));
+    const z = tzFmt.formatToParts(now).find(p => p.type === 'timeZoneName');
+    setAll('.js-tz', z ? z.value : tz);
   };
   tick(); setInterval(tick, 30000);
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  const showLoc = ({ city, cc, lat, lon }) => {
+    setAll('.js-city', city || 'your city');
+    setAll('.js-loc', [city, cc].filter(Boolean).join(', ') || 'your city');
+    if (lat != null && lon != null) {
+      const f = (v, p, n) => `${Math.abs(v).toFixed(2)}° ${v >= 0 ? p : n}`;
+      setAll('.js-coords', `${f(+lat, 'N', 'S')} · ${f(+lon, 'E', 'W')}`);
+    }
+    document.querySelectorAll('[data-loc-label]').forEach(el => {
+      el.setAttribute('aria-label', `Your local time${city ? ' in ' + city : ''}`);
+    });
+  };
+  // Instant guess from timezone name, e.g. "America/New_York" -> "New York"
+  // (browser language is NOT a location — en-US phones in India would show "US")
+  const TZ_ALIAS = { Calcutta: 'Kolkata', Saigon: 'Ho Chi Minh', Katmandu: 'Kathmandu', Rangoon: 'Yangon', Kiev: 'Kyiv' };
+  const tzCity = (tz.split('/').pop() || '').replace(/_/g, ' ');
+  showLoc({ city: TZ_ALIAS[tzCity] || tzCity, cc: '' });
+
+  const applyGeo = g => {
+    if (!g) return;
+    if (g.timezone && g.timezone !== tz) { tz = g.timezone; makeFmts(); tick(); }
+    showLoc({ city: g.city || g.region, cc: g.country_code, lat: g.latitude, lon: g.longitude });
+  };
+  let cached = null;
+  try { cached = JSON.parse(sessionStorage.getItem('nr-geo')); } catch (e) {}
+  if (cached) applyGeo(cached);
+  else if ('fetch' in window) {
+    fetch('https://get.geojs.io/v1/ip/geo.json', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(g => {
+        if (!g) return;
+        const keep = { city: g.city, region: g.region, country_code: g.country_code, latitude: g.latitude, longitude: g.longitude, timezone: g.timezone };
+        try { sessionStorage.setItem('nr-geo', JSON.stringify(keep)); } catch (e) {}
+        applyGeo(keep);
+      })
+      .catch(() => {});
+  }
 
   /* ---------- Story timeline ---------- */
   const timeline = document.getElementById('timeline');
@@ -300,10 +495,8 @@
     const pctEl = document.getElementById('vaultPct');
     const card = document.getElementById('tcard');
     const inner = document.getElementById('tcardInner');
-    const canvas = document.getElementById('embers');
-    const ctx = canvas.getContext('2d');
     const behind = () => [document.getElementById('main'), document.querySelector('footer'), document.querySelector('.nav'), document.getElementById('cord')].filter(Boolean);
-    let open = false, timers = [], embersRaf = 0, cardRaf = 0;
+    let open = false, timers = [], cardRaf = 0;
 
     // ---- card motion: rotY = drag/flip angle, tilt = hover lean (all eased in one rAF loop)
     const st = { rot: 0, rotT: 0, tx: 0, ty: 0, txT: 0, tyT: 0, vel: 0, drag: false, lastX: 0, hx: 50, hxT: 50 };
@@ -317,6 +510,8 @@
       st.tx += (st.txT - st.tx) * e; st.ty += (st.tyT - st.ty) * e; st.hx += (st.hxT - st.hx) * e;
       inner.style.transform = `rotateX(${st.tx.toFixed(2)}deg) rotateY(${(st.rot + st.ty).toFixed(2)}deg)`;
       vault.style.setProperty('--hx', `${st.hx.toFixed(1)}%`);
+      spot.x += (spot.xT - spot.x) * e * 0.5; spot.y += (spot.yT - spot.y) * e * 0.5;
+      vault.style.setProperty('--mx', `${spot.x.toFixed(1)}%`); vault.style.setProperty('--my', `${spot.y.toFixed(1)}%`);
       cardRaf = open ? requestAnimationFrame(cardLoop) : 0;
     };
     const lean = (e) => {
@@ -346,34 +541,12 @@
       if (e.key === 'ArrowRight') st.rotT += 30;
     });
 
-    // ---- embers: warm sparks drifting up
-    let parts = [];
-    // one pre-rendered glow sprite, stamped per ember (shadowBlur per particle is far too slow)
-    const sprite = document.createElement('canvas');
-    sprite.width = sprite.height = 32;
-    { const g = sprite.getContext('2d'); const rg = g.createRadialGradient(16, 16, 0, 16, 16, 16);
-      rg.addColorStop(0, 'rgba(255,220,150,1)'); rg.addColorStop(.25, 'rgba(255,170,70,.9)'); rg.addColorStop(1, 'rgba(255,120,30,0)');
-      g.fillStyle = rg; g.fillRect(0, 0, 32, 32); }
-    const sizeCanvas = () => {
-      const dpr = Math.min(1.5, window.devicePixelRatio || 1);
-      canvas.width = innerWidth * dpr; canvas.height = innerHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    const spawn = (anyY) => ({ x: Math.random() * innerWidth, y: anyY ? Math.random() * innerHeight : innerHeight + 10,
-      r: Math.random() * 2.2 + .6, v: Math.random() * .5 + .15, sway: Math.random() * Math.PI * 2, a: Math.random() * .6 + .3 });
-    let emLast = 0;
-    const embers = (now) => {
-      const f = Math.min(4, emLast ? (now - emLast) / 16.7 : 1); emLast = now;
-      ctx.clearRect(0, 0, innerWidth, innerHeight);
-      for (const p of parts) {
-        p.y -= p.v * f; p.sway += .02 * f; p.x += Math.sin(p.sway) * .3 * f;
-        if (p.y < -10) Object.assign(p, spawn(false));
-        const s = p.r * 6;
-        ctx.globalAlpha = p.a;
-        ctx.drawImage(sprite, p.x - s / 2, p.y - s / 2, s, s);
-      }
-      ctx.globalAlpha = 1;
-      embersRaf = open ? requestAnimationFrame(embers) : 0;
-    };
+    // ---- studio spotlight follows the cursor (mouse only; eased in cardLoop)
+    const spot = { x: 50, y: 45, xT: 50, yT: 45 };
+    vault.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || reduceMotion) return;
+      spot.xT = (e.clientX / innerWidth) * 100; spot.yT = (e.clientY / innerHeight) * 100;
+    });
 
     const later = (fn, ms) => timers.push(setTimeout(fn, ms));
     const openVault = () => {
@@ -395,14 +568,14 @@
         else later(() => { vault.classList.add('is-ready'); card.focus({ preventScroll: true }); }, 200);
       };
       requestAnimationFrame(count);
-      if (!reduceMotion) { sizeCanvas(); parts = Array.from({ length: 70 }, () => spawn(true)); emLast = 0; embersRaf = requestAnimationFrame(embers); }
+      vault.scrollTop = 0;
       cardLast = 0; cardRaf = requestAnimationFrame(cardLoop);
     };
     const closeVault = () => {
       if (!open) return;
       open = false;
       timers.forEach(clearTimeout); timers = [];
-      cancelAnimationFrame(embersRaf); cancelAnimationFrame(cardRaf);
+      cancelAnimationFrame(cardRaf);
       vault.classList.remove('is-open');
       document.body.classList.toggle('room-open', !!currentRoom);
       behind().forEach(el => { el.inert = false; });
@@ -411,15 +584,17 @@
     };
     abilityBtn.addEventListener('click', openVault);
     document.getElementById('vaultClose').addEventListener('click', closeVault);
-    vault.addEventListener('click', (e) => { if (e.target === vault) closeVault(); });
+    vault.addEventListener('click', (e) => {
+      if (e.target === vault || e.target.id === 'vaultStage') closeVault();
+      if (e.target.closest('[data-vault-close]')) closeVault(); // "Get in touch" → close, then follow #contact
+    });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) { e.stopImmediatePropagation(); closeVault(); } }, true);
-    window.addEventListener('resize', () => { if (open && !reduceMotion) sizeCanvas(); });
-    // keep Tab inside the dialog
+    // keep Tab inside the dialog: close, card, panel links
     vault.addEventListener('keydown', (e) => {
       if (e.key !== 'Tab') return;
-      const f = [document.getElementById('vaultClose'), card];
+      const f = [document.getElementById('vaultClose'), card, ...vault.querySelectorAll('.vault__panel a')];
       const i = f.indexOf(document.activeElement);
-      e.preventDefault(); f[(i + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus();
+      e.preventDefault(); f[(i + (e.shiftKey ? f.length - 1 : 1) + f.length) % f.length].focus();
     });
   }
 
