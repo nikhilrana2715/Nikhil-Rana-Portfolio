@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="tokens.css?v=4.8">
-  <link rel="stylesheet" href="style.css?v=4.8">
+  <link rel="stylesheet" href="tokens.css?v=5.6">
+  <link rel="stylesheet" href="style.css?v=5.6">
 </head>
 <body id="top">
   <a class="skip" href="#main">Skip to content</a>
@@ -68,7 +68,7 @@
           </div>
           <p class="lead">Developer from Ranchi, India — building web apps, games and Android apps. Currently at MRS Bearings and doing my MCA.</p>
           <div class="hero__btns">
-            <a href="https://drive.google.com/file/d/1fOhgtM-z2Djm2z56_rHmaTW-F3Zb-YpO/view" class="btn btn--primary" target="_blank" rel="noopener">View resume
+            <a href="#resume" class="btn btn--primary" data-resume aria-haspopup="dialog">View resume
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
             </a>
             <a href="#work" class="btn btn--secondary">See my work</a>
@@ -578,7 +578,7 @@
           <div><dt>Shipped</dt><dd>7+ projects · 2 games · 3 platforms</dd></div>
         </dl>
         <div class="vault__ctas">
-          <a class="vbtn vbtn--primary" href="https://drive.google.com/file/d/1fOhgtM-z2Djm2z56_rHmaTW-F3Zb-YpO/view" target="_blank" rel="noopener">View resume ↗</a>
+          <a class="vbtn vbtn--primary" href="#resume" data-resume aria-haspopup="dialog">View resume ↗</a>
           <a class="vbtn" href="#contact" data-vault-close>Get in touch</a>
           <a class="vbtn vbtn--ghost" href="https://github.com/nikhilrana2715" target="_blank" rel="noopener">GitHub ↗</a>
         </div>
@@ -623,6 +623,88 @@
     </div>
   </footer>
 
-  <script src="script.js?v=4.8"></script>
+  <!-- Modal / Resume gate: name + real email before the resume opens -->
+  <dialog class="gate" id="gate" aria-labelledby="gateTitle" aria-describedby="gateLead">
+    <div class="gate__sheet">
+      <button class="gate__close" type="button" data-gate-close aria-label="Close">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+
+      <div class="gate__doc" aria-hidden="true">
+        <div class="gate__paper">
+          <span class="gate__line gate__line--title"></span>
+          <span class="gate__line gate__line--sub"></span>
+          <span class="gate__rule"></span>
+          <span class="gate__line"></span><span class="gate__line"></span><span class="gate__line gate__line--short"></span>
+          <span class="gate__rule"></span>
+          <span class="gate__line"></span><span class="gate__line gate__line--short"></span><span class="gate__line"></span>
+        </div>
+        <span class="gate__lock">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path class="gate__shackle" d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        </span>
+        <p class="gate__tag">Nikhil Rana · Resume · PDF</p>
+      </div>
+
+      <div class="gate__body">
+        <div class="gate__step" data-gate-step="form">
+          <p class="gate__eyebrow">NR / Resume access</p>
+          <h2 class="gate__title" id="gateTitle">Quick intro first.</h2>
+          <p class="gate__lead" id="gateLead">Your full name and email, then tap <b>Verify</b> — Google confirms the email is really yours. The resume unlocks right after. No spam, ever.</p>
+          <form class="gate__form" id="gateForm" novalidate>
+            <div class="field">
+              <label for="gateName">Full name</label>
+              <input class="input" id="gateName" name="name" type="text" placeholder="Your name" required autocomplete="name" minlength="2" maxlength="60" aria-describedby="gateNameErr">
+              <p class="field__err" id="gateNameErr" aria-live="polite"></p>
+            </div>
+            <div class="field field--verify">
+              <label for="gateEmail">Email</label>
+              <div class="field__control">
+                <input class="input" id="gateEmail" name="email" type="email" placeholder="you@gmail.com" required autocomplete="email" inputmode="email" spellcheck="false" maxlength="120" aria-describedby="gateEmailState gateEmailErr">
+                <button type="button" class="verify-btn" id="gateVerify">
+                  <svg class="verify-btn__g" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M21.6 12.23c0-.7-.06-1.37-.18-2.02H12v3.83h5.38a4.6 4.6 0 0 1-2 3.02v2.5h3.24c1.9-1.75 2.98-4.32 2.98-7.33Z"/><path fill="currentColor" d="M12 22c2.7 0 4.97-.9 6.62-2.43l-3.24-2.5c-.9.6-2.04.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H3.07v2.58A10 10 0 0 0 12 22Z" opacity=".8"/><path fill="currentColor" d="M6.41 13.9a6 6 0 0 1 0-3.8V7.52H3.07a10 10 0 0 0 0 8.96l3.34-2.58Z" opacity=".6"/><path fill="currentColor" d="M12 5.98c1.47 0 2.79.5 3.83 1.5l2.87-2.87A9.97 9.97 0 0 0 3.07 7.52l3.34 2.58C7.2 7.74 9.4 5.98 12 5.98Z" opacity=".9"/></svg>
+                  <span class="verify-btn__label">Verify</span>
+                </button>
+                <span class="verify-chip" id="gateEmailState" aria-live="polite"></span>
+              </div>
+              <p class="field__err" id="gateEmailErr" aria-live="polite"></p>
+            </div>
+            <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>
+            <button type="submit" class="btn btn--primary btn--block gate__submit" disabled aria-describedby="gateLockNote">View resume
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+            </button>
+            <p class="gate__fine" id="gateLockNote">Verify your email to unlock · checked with your Google account</p>
+          </form>
+        </div>
+
+        <!-- Alert / Error: popup over the form when the email can't be verified -->
+        <div class="gate__alert" id="gateAlert" role="alertdialog" aria-modal="false" aria-labelledby="gateAlertTitle" aria-describedby="gateAlertText" hidden>
+          <div class="gate__alertCard">
+            <span class="gate__alertIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 7v6M12 17h.01"/><circle cx="12" cy="12" r="9.5"/></svg>
+            </span>
+            <h3 class="gate__alertTitle" id="gateAlertTitle">This email isn't verified</h3>
+            <p class="gate__alertText" id="gateAlertText"></p>
+            <p class="gate__alertHint" id="gateAlertHint">Try again with a different email — one that's linked to your own Google account.</p>
+            <div class="gate__alertBtns">
+              <button type="button" class="btn btn--primary btn--block" id="gateAlertFix" hidden></button>
+              <button type="button" class="btn btn--secondary btn--block" id="gateAlertRetry">Try another email</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gate__step" data-gate-step="done" hidden>
+          <p class="gate__eyebrow gate__eyebrow--ok">Email verified · Unlocked</p>
+          <h2 class="gate__title" tabindex="-1" id="gateDoneTitle">Thanks, <span id="gateWho">there</span>.</h2>
+          <p class="gate__lead" id="gateDoneLead">Your resume is ready. It opens in a new tab on Google Drive.</p>
+          <a class="btn btn--primary btn--block" id="gateOpen" href="#" target="_blank" rel="noopener">Open resume
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+          </a>
+          <button type="button" class="btn btn--link gate__back" data-gate-close>Back to the site</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="script.js?v=5.6"></script>
 </body>
 </html>

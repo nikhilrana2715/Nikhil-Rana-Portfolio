@@ -151,3 +151,13 @@
   --portrait-edge: rgba(201, 164, 92, .38); /* brass hairline + outlined name */
   --shadow-sticker: 0 10px 14px rgba(0, 0, 0, .28);
 }
+
+/* v4.9 — Modal / Resume gate */
+:root {
+  --gate-scrim: rgba(26, 24, 24, .46);
+  --gate-paper-line: rgba(26, 24, 24, .14);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --gate-scrim: rgba(0, 0, 0, .66); }
+}
+:root[data-theme="dark"] { --gate-scrim: rgba(0, 0, 0, .66); }

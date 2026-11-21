@@ -588,7 +588,7 @@
       if (e.target === vault || e.target.id === 'vaultStage') closeVault();
       if (e.target.closest('[data-vault-close]')) closeVault(); // "Get in touch" → close, then follow #contact
     });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) { e.stopImmediatePropagation(); closeVault(); } }, true);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open && !document.getElementById('gate')?.open) { e.stopImmediatePropagation(); closeVault(); } }, true);
     // keep Tab inside the dialog: close, card, panel links
     vault.addEventListener('keydown', (e) => {
       if (e.key !== 'Tab') return;
@@ -791,4 +791,421 @@
       sendBtn.textContent = label;
     }
   });
+
+  /* ---------- Modal / Resume gate: name + real email → resume ---------- */
+  // Static site, so this is a soft gate: the Drive link lives only here in JS.
+  // Asked on EVERY "View resume" click (nothing remembered), and Nikhil gets an email per view.
+  const RESUME_URL = 'https://drive.google.com/file/d/1fOhgtM-z2Djm2z56_rHmaTW-F3Zb-YpO/view';
+  const gate = document.getElementById('gate');
+  const resumeLinks = document.querySelectorAll('[data-resume]');
+  try { localStorage.removeItem('nr-resume'); } catch { /* v4.9 used to remember visitors */ }
+
+  if (!gate || typeof gate.showModal !== 'function') {
+    resumeLinks.forEach(a => { a.href = RESUME_URL; a.target = '_blank'; a.rel = 'noopener'; }); // very old browser: never block
+  } else {
+
+    const gForm = document.getElementById('gateForm');
+    const nameIn = document.getElementById('gateName');
+    const emailIn = document.getElementById('gateEmail');
+    const nameErr = document.getElementById('gateNameErr');
+    const emailErr = document.getElementById('gateEmailErr');
+    const submit = gForm.querySelector('.gate__submit');
+    const submitHTML = submit.innerHTML;
+    const steps = gate.querySelectorAll('[data-gate-step]');
+    const openLink = document.getElementById('gateOpen');
+    openLink.href = RESUME_URL;
+    let opener = null, busy = false;
+
+    const showStep = (name) => steps.forEach(s => { s.hidden = s.dataset.gateStep !== name; });
+    const openGate = (from) => {
+      opener = from || document.activeElement;
+      gate.classList.remove('is-closing', 'is-unlocked', 'is-checking', 'is-denied');
+      document.getElementById('gateAlert').hidden = true;
+      // fresh, empty form on every open
+      gForm.reset();
+      setErr(nameIn, nameErr, ''); resetVerify();
+      showStep('form');
+      gate.showModal();
+      nameIn.focus();
+    };
+    const closeGate = () => {
+      if (!gate.open || gate.classList.contains('is-closing')) return;
+      gate.classList.add('is-closing');
+      setTimeout(() => { gate.close(); gate.classList.remove('is-closing'); opener?.focus?.({ preventScroll: true }); }, reduceMotion ? 0 : 220);
+    };
+
+    resumeLinks.forEach(a => a.addEventListener('click', (e) => {
+      e.preventDefault();
+      openGate(a);
+    }));
+    gate.addEventListener('cancel', (e) => { e.preventDefault(); closeGate(); }); // Esc
+    gate.addEventListener('click', (e) => {
+      if (e.target === gate || e.target.closest('[data-gate-close]')) closeGate(); // backdrop / × / back
+    });
+    openLink.addEventListener('click', () => setTimeout(closeGate, 300));
+
+    /* --- validation --- */
+    const EMAIL_RE = /^[a-z0-9](?:[a-z0-9._%+-]{0,62}[a-z0-9])?@(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/i;
+    const FAKE_LOCAL = /^(test\d*|testing|abc|abcd|asdf\w*|qwerty\w*|xyz|fake|demo|sample|example|user|admin|someone|anyone|nobody|no-?reply|null|none|a+|x+|1+|123\d*)$/i;
+    const FAKE_DOMAINS = new Set(['example.com', 'example.org', 'example.net', 'test.com', 'test.in', 'domain.com', 'email.test', 'abc.com', 'xyz.com', 'localhost']);
+    const DISPOSABLE = new Set(['mailinator.com', 'guerrillamail.com', 'guerrillamail.net', 'sharklasers.com', '10minutemail.com', '10minutemail.net', 'tempmail.com', 'temp-mail.org', 'temp-mail.io', 'tempmail.net', 'tempmailo.com', 'tempail.com', 'throwawaymail.com', 'yopmail.com', 'yopmail.net', 'getnada.com', 'nada.email', 'trashmail.com', 'dispostable.com', 'maildrop.cc', 'mailnesia.com', 'mintemail.com', 'fakeinbox.com', 'emailondeck.com', 'mohmal.com', 'burnermail.io', 'mailpoof.com', 'moakt.com', 'spamgourmet.com', 'getairmail.com', 'fakemail.net', 'inboxkitten.com', 'mail.tm', 'mail.gw', 'tmpmail.org', 'tmail.ws', 'emailfake.com', 'byom.de', 'mvrht.net', 'dropmail.me', '1secmail.com', 'linshiyouxiang.net', 'grr.la', 'spam4.me']);
+    const TYPOS = {
+      'gmial.com': 'gmail.com', 'gmal.com': 'gmail.com', 'gmai.com': 'gmail.com', 'gamil.com': 'gmail.com', 'gnail.com': 'gmail.com',
+      'gmaill.com': 'gmail.com', 'gmail.co': 'gmail.com', 'gmail.con': 'gmail.com', 'gmail.cm': 'gmail.com', 'gmail.om': 'gmail.com', 'gmail.in': 'gmail.com',
+      'yaho.com': 'yahoo.com', 'yahooo.com': 'yahoo.com', 'yahoo.con': 'yahoo.com', 'yahoo.co': 'yahoo.com',
+      'hotmal.com': 'hotmail.com', 'hotmial.com': 'hotmail.com', 'hotmail.con': 'hotmail.com',
+      'outlok.com': 'outlook.com', 'outlook.co': 'outlook.com', 'outlook.con': 'outlook.com',
+      'icloud.co': 'icloud.com', 'iclod.com': 'icloud.com', 'rediffmail.co': 'rediffmail.com', 'redifmail.com': 'rediffmail.com'
+    };
+    const KNOWN = new Set(['gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co.in', 'yahoo.in', 'yahoo.co.uk', 'ymail.com', 'rocketmail.com', 'outlook.com', 'outlook.in', 'hotmail.com', 'hotmail.co.uk', 'live.com', 'live.in', 'msn.com', 'icloud.com', 'me.com', 'mac.com', 'proton.me', 'protonmail.com', 'rediffmail.com', 'zoho.com', 'zohomail.in', 'aol.com', 'gmx.com', 'gmx.net', 'mail.com', 'email.com']);
+    // Common inboxes that typos get checked against (fuzzy match)
+    const POPULAR = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'rediffmail.com', 'yahoo.co.in', 'live.com', 'protonmail.com', 'zoho.com', 'aol.com'];
+    // Damerau-Levenshtein (optimal string alignment): swaps count as 1 edit → "gmial" vs "gmail" = 1
+    const editDist = (a, b) => {
+      const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+      for (let j = 1; j <= b.length; j++) d[0][j] = j;
+      for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+          const c = a[i - 1] === b[j - 1] ? 0 : 1;
+          d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + c);
+          if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+        }
+      }
+      return d[a.length][b.length];
+    };
+    const suggestDomain = (domain) => {
+      if (KNOWN.has(domain)) return null;
+      if (TYPOS[domain]) return TYPOS[domain];
+      let best = null, bestD = 9;
+      for (const p of POPULAR) { const k = editDist(domain, p); if (k < bestD) { bestD = k; best = p; } }
+      if (best && bestD <= (domain.length >= 9 ? 2 : 1)) return best;
+      const tld = domain.replace(/\.(con|cmo|ocm|comm|coom|cpm|vom|xom|cim)$/, '.com').replace(/\.co\.inn?$|\.coin$/, '.co.in');
+      return tld !== domain ? tld : null;
+    };
+    // Username rules of the big providers — an address that breaks them can't exist
+    const PROVIDER = [
+      [/^(gmail|googlemail)\.com$/, /^[a-z0-9](?:[a-z0-9.]{4,28})[a-z0-9]$/, 'Gmail addresses have 6–30 letters, numbers or dots.'],
+      [/^(yahoo\.(com|co\.in|in|co\.uk)|ymail\.com|rocketmail\.com)$/, /^[a-z][a-z0-9._]{3,31}$/, 'Yahoo addresses start with a letter and have 4–32 characters.'],
+      [/^(outlook|hotmail|live|msn)\.(com|in|co\.uk)$/, /^[a-z][a-z0-9._-]{0,63}$/, 'Outlook / Hotmail addresses start with a letter.'],
+      [/^(icloud|me|mac)\.com$/, /^[a-z][a-z0-9._]{2,20}$/, 'iCloud addresses start with a letter and have 3–21 characters.']
+    ];
+    // Keyboard mashing / filler: "asdfg", "qwerty", "aaaa", "1234567", 6+ consonants in a row
+    const ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm', 'abcdefghijklmnopqrstuvwxyz'];
+    const looksMashed = (local) => {
+      const s = local.replace(/[._-]/g, '');
+      if (/(.)\1{3,}/.test(s)) return true;
+      for (let i = 0; i + 5 <= s.length; i++) {
+        const w = s.slice(i, i + 5);
+        if (ROWS.some(r => r.includes(w) || [...r].reverse().join('').includes(w))) return true;
+      }
+      if (/0123456|1234567|2345678|3456789|9876543|8765432|7654321|6543210/.test(s)) return true;
+      return /[bcdfghjklmnpqrstvwxz]{6,}/.test(s.replace(/\d/g, ' '));
+    };
+    const keptDomains = new Set(); // visitor tapped "Keep mine" on a suggestion
+
+    // Real inbox check: does the domain accept mail? (DNS-over-HTTPS, no key; only the domain is sent)
+    const dnsCache = new Map();
+    const dns = async (name, type) => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 4000);
+      try {
+        const r = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(name)}&type=${type}`, { signal: ctrl.signal });
+        if (!r.ok) throw new Error(`DNS ${r.status}`);
+        return await r.json();
+      } finally { clearTimeout(t); }
+    };
+    const acceptsMail = async (domain) => {
+      if (KNOWN.has(domain)) return true;
+      if (dnsCache.has(domain)) return dnsCache.get(domain);
+      let ok = null; // null = couldn't check (network/blocked) → let the visitor through
+      try {
+        const mx = await dns(domain, 'MX');
+        const recs = (mx.Answer || []).filter(a => a.type === 15);
+        if (mx.Status === 3) ok = false;                                      // domain doesn't exist
+        else if (recs.length) ok = recs.some(a => !/^0\s+\.?$/.test(a.data)); // "0 ." = null MX, takes no mail
+        else ok = ((await dns(domain, 'A')).Answer || []).some(a => a.type === 1); // implicit MX
+      } catch (err) { console.warn('Resume gate: inbox check skipped', err); }
+      if (ok !== null) dnsCache.set(domain, ok);
+      return ok;
+    };
+
+    const setErr = (input, el, msg) => {
+      input.classList.toggle('is-invalid', !!msg);
+      input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      el.textContent = msg || '';
+    };
+    const checkName = () => {
+      const v = nameIn.value.trim().replace(/\s+/g, ' ');
+      if (!v) return 'Please enter your name.';
+      if (!/^[\p{L}][\p{L}\p{M} .'-]{1,59}$/u.test(v) || (v.match(/\p{L}/gu) || []).length < 2) return 'Use letters only — at least 2.';
+      if (/^(.)\1+$/i.test(v.replace(/[\s.'-]/g, '')) || /^(test|asdf\w*|qwerty|abc|xyz|name|fake|na|none)$/i.test(v)) return 'Please enter your real name.';
+      return '';
+    };
+    // '' = fine, string = error, { fix } = likely typo with a one-tap fix
+    const checkEmailSync = (raw = emailIn.value) => {
+      const v = raw.trim().toLowerCase();
+      if (!v) return 'Please enter your email.';
+      if (!EMAIL_RE.test(v) || v.includes('..')) return 'That email doesn\'t look right — check for typos.';
+      const [local, domain] = v.split('@');
+      // known-bad domains first, so a temp inbox is never "corrected" into a real provider
+      if (DISPOSABLE.has(domain) || [...DISPOSABLE].some(d => domain.endsWith(`.${d}`))) return 'Temporary inboxes aren\'t accepted — use your real email.';
+      if (FAKE_DOMAINS.has(domain) || FAKE_LOCAL.test(local)) return 'Please use your real email address.';
+      const fixed = keptDomains.has(domain) ? null : suggestDomain(domain);
+      if (fixed) return { fix: `${local}@${fixed}`, domain };
+      const user = local.split('+')[0];
+      const rule = PROVIDER.find(([d]) => d.test(domain));
+      if (rule && (!rule[1].test(user) || user.includes('..'))) return `${rule[2]} Please check yours.`;
+      if (looksMashed(user)) return 'That looks like random typing — please enter your real email.';
+      return '';
+    };
+    const showEmailErr = (res) => {
+      if (res && typeof res === 'object') {
+        setErr(emailIn, emailErr, 'Did you mean ');
+        const b = document.createElement('button');
+        b.type = 'button'; b.textContent = res.fix;
+        b.addEventListener('click', () => { emailIn.value = res.fix; resetVerify(); emailIn.focus(); });
+        const keep = document.createElement('button');
+        keep.type = 'button'; keep.textContent = 'keep mine';
+        keep.addEventListener('click', () => { keptDomains.add(res.domain); resetVerify(); emailIn.focus(); });
+        emailErr.append(b, '? · ', keep);
+      } else setErr(emailIn, emailErr, res);
+    };
+
+    nameIn.addEventListener('input', () => { if (nameIn.classList.contains('is-invalid')) setErr(nameIn, nameErr, checkName()); });
+    nameIn.addEventListener('blur', () => { if (nameIn.value.trim()) setErr(nameIn, nameErr, checkName()); });
+
+    const setBusy = (on, label = 'Checking your email…') => {
+      busy = on;
+      submit.disabled = on;
+      gate.classList.toggle('is-checking', on);
+      submit.innerHTML = on ? `<span class="spin" aria-hidden="true"></span>${label}` : submitHTML;
+    };
+
+    // Email Nikhil on every view: "<name> is viewing your resume in your portfolio".
+    // Same FormSubmit alias as the contact form (already activated). Never blocks the visitor;
+    // one retry if the first request fails.
+    const notifyView = (name, email, googleName = '') => {
+      let geo = null;
+      try { geo = JSON.parse(sessionStorage.getItem('nr-geo')); } catch { /* no cached location */ }
+      const where = geo?.city ? [geo.city, geo.region, geo.country_code].filter(Boolean).join(', ') : 'Unknown';
+      const ua = navigator.userAgent;
+      const device = /Android/i.test(ua) ? 'Android phone' : /iPhone|iPad/i.test(ua) ? 'iPhone / iPad'
+        : /Windows/i.test(ua) ? 'Windows PC' : /Mac/i.test(ua) ? 'Mac' : /Linux/i.test(ua) ? 'Linux PC' : 'Other';
+      const body = JSON.stringify({
+        'Viewer name': name,
+        'Viewer email': email,
+        'What happened': `${name} is viewing your resume in your portfolio.`,
+        'Email check': googleName ? 'Verified with Google sign-in ✓' : 'Passed smart check (format, typos, fake/temp, domain MX) ✓',
+        'Name on Google account': googleName || '—',
+        'Time (IST)': new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }),
+        'Approx. location': where,
+        'Device': device,
+        'Came from': document.referrer || 'Direct / typed URL',
+        'Page': location.href,
+        _replyto: email,
+        _subject: `👀 ${name} is viewing your resume — Portfolio`,
+        _template: 'table',
+        _captcha: 'false'
+      });
+      const send = () => fetch(`https://formsubmit.co/ajax/${FORM_ID}`, {
+        method: 'POST', keepalive: true,
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body
+      }).then(async r => {
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok || String(d.success) === 'false') throw new Error(d.message || `HTTP ${r.status}`);
+      });
+      send().catch(() => new Promise(r => setTimeout(r, 1500)).then(send))
+        .catch(err => console.warn('Resume gate: view email not sent', err));
+    };
+
+    /* --- Email verification: "Verify" button → Google confirms the email belongs to the visitor --- */
+    // Google Identity Services (OAuth token flow, scope email+profile). The visitor picks their Google
+    // account in Google's own window; Google returns that account's verified email; it must match the
+    // typed email. Client ID is public by design (not a secret). Set it up: see CLAUDE.md "Google verify".
+    const GOOGLE_CLIENT_ID = ''; // e.g. '1234567890-abc123.apps.googleusercontent.com'
+    const VERIFY_MIN_MS = 1200;  // feels deliberate: ~1–2 s "Verifying…"
+    const emailField = emailIn.closest('.field');
+    const emailState = document.getElementById('gateEmailState');
+    const verifyBtn = document.getElementById('gateVerify');
+    const verifyLabel = verifyBtn.querySelector('.verify-btn__label');
+    let verified = null; // { email, googleName } once Google confirmed it
+    const normEmail = () => emailIn.value.trim().toLowerCase();
+    const setState = (state) => {
+      emailField.dataset.state = state || '';
+      emailState.textContent = state === 'ok' ? 'Verified' : '';
+      verifyBtn.disabled = state === 'checking';
+      verifyLabel.textContent = state === 'checking' ? 'Verifying…' : 'Verify';
+      submit.disabled = state !== 'ok';
+    };
+    const resetVerify = () => { verified = null; setState(''); setErr(emailIn, emailErr, ''); };
+    emailIn.addEventListener('input', resetVerify);
+    emailIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); verifyBtn.click(); } });
+
+    // Gmail ignores dots and +tags: n.ikhil+cv@gmail.com === nikhil@gmail.com
+    const canon = (email) => {
+      let [l, d] = email.toLowerCase().split('@');
+      if (d === 'googlemail.com') d = 'gmail.com';
+      if (d === 'gmail.com') l = l.split('+')[0].replace(/\./g, '');
+      return `${l}@${d}`;
+    };
+
+    let gisP = null;
+    const loadGoogle = () => gisP || (gisP = new Promise((res, rej) => {
+      if (window.google?.accounts?.oauth2) return res();
+      const s = document.createElement('script');
+      s.src = 'https://accounts.google.com/gsi/client';
+      s.async = true;
+      s.onload = () => res();
+      s.onerror = () => { gisP = null; rej(new Error('gis-load')); };
+      document.head.append(s);
+    }));
+    if (GOOGLE_CLIENT_ID) gate.addEventListener('focusin', () => loadGoogle().catch(() => {}), { once: true });
+
+    // Must be called inside the click (Google opens a popup window)
+    const askGoogle = (hint) => new Promise((resolve) => {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: 'openid email profile',
+        hint,
+        prompt: 'select_account',
+        callback: async (tok) => {
+          if (tok.error || !tok.access_token) return resolve({ ok: false, why: 'cancel' });
+          try {
+            const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${tok.access_token}` } });
+            const u = await r.json();
+            google.accounts.oauth2.revoke(tok.access_token, () => {}); // done with it — nothing kept
+            resolve({ ok: true, email: String(u.email || '').toLowerCase(), emailVerified: u.email_verified === true || u.email_verified === 'true', name: u.name || '' });
+          } catch { resolve({ ok: false, why: 'network' }); }
+        },
+        error_callback: (err) => resolve({ ok: false, why: err?.type === 'popup_failed_to_open' ? 'blocked' : 'cancel' })
+      });
+      client.requestAccessToken();
+    });
+    const wait = (t0) => new Promise(r => setTimeout(r, Math.max(0, VERIFY_MIN_MS - (Date.now() - t0))));
+    const reject = (v) => { setState('bad'); showAlert(v); };
+
+    verifyBtn.addEventListener('click', async () => {
+      if (verifyBtn.disabled) return;
+      hideAlert();
+      const email = normEmail();
+      if (!email) { setErr(emailIn, emailErr, 'Please enter your email.'); emailIn.focus(); return; }
+      // 1. instant local checks (format, typos, provider rules, temp inboxes, random typing)
+      const sync = checkEmailSync(email);
+      if (sync && typeof sync === 'object') return reject({ title: 'Looks like a typo', reason: `“${email}” has a spelling mistake in it.`, fix: sync.fix });
+      if (sync) return reject({ title: 'This email isn\'t verified', reason: sync });
+      // 2a. No Google Client ID yet → smart check: local rules above + live domain (MX) lookup
+      if (!GOOGLE_CLIENT_ID) {
+        setState('checking');
+        const t0 = Date.now();
+        const mx = await acceptsMail(email.split('@')[1]);
+        await wait(t0);
+        if (canon(normEmail()) !== canon(email)) return setState(''); // edited while verifying
+        if (mx === false) return reject({ title: 'This email isn\'t verified', reason: `“${email.split('@')[1]}” doesn't exist or can't receive mail.` });
+        verified = { email, googleName: '', method: 'smart' };
+        setErr(emailIn, emailErr, '');
+        setState('ok');
+        submit.focus();
+        return;
+      }
+      if (!window.google?.accounts?.oauth2) {
+        loadGoogle().catch(() => {});
+        return reject({ title: 'Verification unavailable', reason: 'Google verification couldn\'t start. Please check your connection and tap Verify again.', hint: '' });
+      }
+      // 2. Google: visitor proves the email is theirs (popup must open inside this click)
+      setState('checking');
+      const t0 = Date.now();
+      const mxP = acceptsMail(email.split('@')[1]);
+      const g = await askGoogle(email);
+      const mx = await mxP;
+      await wait(t0);
+      if (canon(normEmail()) !== canon(email)) return setState(''); // edited while verifying
+      if (mx === false) return reject({ title: 'This email isn\'t verified', reason: `“${email.split('@')[1]}” doesn't exist or can't receive mail.` });
+      if (!g.ok) {
+        return reject(g.why === 'blocked'
+          ? { title: 'Google window was blocked', reason: 'Your browser blocked the Google sign-in window. Allow pop-ups for this site and tap Verify again.', hint: '' }
+          : { title: 'Not verified', reason: 'Verification was cancelled or failed — the email wasn\'t confirmed by Google.' });
+      }
+      if (!g.emailVerified || canon(g.email) !== canon(email)) {
+        return reject({ title: 'This email isn\'t verified', reason: `Google couldn't confirm “${email}” as your account${g.email ? ` (you chose ${g.email})` : ''}.` });
+      }
+      verified = { email, googleName: g.name };
+      setErr(emailIn, emailErr, '');
+      setState('ok');
+      submit.focus();
+    });
+
+    /* --- Popup / Alert: "This email isn't verified" --- */
+    const alertBox = document.getElementById('gateAlert');
+    const alertFix = document.getElementById('gateAlertFix');
+    let alertFixValue = '';
+    const showAlert = (v) => {
+      document.getElementById('gateAlertTitle').textContent = v.title;
+      document.getElementById('gateAlertText').textContent = v.reason;
+      alertFixValue = v.fix || '';
+      alertFix.hidden = !v.fix;
+      alertFix.textContent = v.fix ? `Use ${v.fix}` : '';
+      const hint = document.getElementById('gateAlertHint');
+      hint.hidden = v.hint === '';
+      hint.textContent = v.hint || 'Try again with a different email — one that\'s linked to your own Google account.';
+      gate.classList.add('is-denied');
+      gate.querySelector('.gate__sheet').scrollTop = 0; // mobile: popup sits over the top of the sheet
+      alertBox.hidden = false;
+      (v.fix ? alertFix : document.getElementById('gateAlertRetry')).focus();
+    };
+    const hideAlert = () => {
+      alertBox.hidden = true;
+      gate.classList.remove('is-denied');
+    };
+    alertFix.addEventListener('click', () => {
+      hideAlert();
+      emailIn.value = alertFixValue;
+      resetVerify();
+      verifyBtn.focus();
+    });
+    document.getElementById('gateAlertRetry').addEventListener('click', () => {
+      hideAlert();
+      emailIn.focus(); emailIn.select();
+    });
+
+    /* --- Unlock: open resume right away --- */
+    const unlock = (name, email, opened, googleName) => {
+      notifyView(name, email, googleName);
+      document.getElementById('gateWho').textContent = name.split(' ')[0];
+      document.getElementById('gateDoneLead').textContent = opened
+        ? 'Your resume just opened in a new tab. Didn\'t see it? Open it again below.'
+        : 'Your email is verified. Tap below to open the resume.';
+      gate.classList.add('is-unlocked');
+      showStep('done');
+      document.getElementById('gateDoneTitle').focus({ preventScroll: true });
+      gForm.reset(); resetVerify();
+    };
+    const openResume = () => {
+      const w = window.open(RESUME_URL, '_blank');
+      if (w) w.opener = null;
+      return !!w;
+    };
+
+    gForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (busy) return;
+      if (gForm.elements._honey.value) return; // bot
+      hideAlert();
+      const nMsg = checkName(); setErr(nameIn, nameErr, nMsg);
+      const name = nameIn.value.trim().replace(/\s+/g, ' ');
+      const email = normEmail();
+      if (!email) setErr(emailIn, emailErr, 'Please enter your email.');
+      if (nMsg) { nameIn.focus(); return; }
+      if (!email) { emailIn.focus(); return; }
+
+      // Locked until Google verified this exact email
+      if (!verified || canon(verified.email) !== canon(email)) {
+        setState('');
+        setErr(emailIn, emailErr, 'Tap Verify first — the resume unlocks after your email is verified.');
+        verifyBtn.focus();
+        return;
+      }
+      unlock(name, email, openResume(), verified.googleName); // same click → no popup blocker
+    });
+  }
 })();
