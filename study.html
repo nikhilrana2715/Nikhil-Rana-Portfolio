@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study notes — Nikhil Rana</title>
+  <meta name="description" content="Nikhil Rana's MCA study notes, subject by subject.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="assets/img7.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <script>try { document.documentElement.dataset.theme = localStorage.getItem('theme') || 'light'; } catch (e) { document.documentElement.dataset.theme = 'light'; }</script>
+  <link rel="stylesheet" href="tokens.css?v=5.8">
+  <link rel="stylesheet" href="style.css?v=5.8">
+</head>
+<body class="page-study">
+  <!-- Bar / Study -->
+  <header class="studybar" id="studybar">
+    <div class="studybar__row">
+      <a class="icon-btn studybar__back" id="backLink" href="courses.html#mca" aria-label="Back to semester">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+      </a>
+      <div class="studybar__title">
+        <p class="studybar__crumb mono" id="crumb">MCA · Semester 1</p>
+        <h1 class="studybar__name" id="subName">Study notes</h1>
+      </div>
+
+      <div class="studybar__tools">
+        <label class="unit-select" id="unitWrap" hidden>
+          <span class="sr-only">Jump to unit</span>
+          <select id="unitSelect"></select>
+        </label>
+        <a class="btn btn--secondary btn--sm studybar__syl" id="sylLink" href="#" target="_blank" rel="noopener" hidden>Syllabus ↗</a>
+        <span class="studybar__pager">
+          <a class="icon-btn" id="prevSub" href="#" aria-label="Previous subject" title="Previous subject">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          </a>
+          <a class="icon-btn" id="nextSub" href="#" aria-label="Next subject" title="Next subject">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+          </a>
+        </span>
+        <a class="icon-btn" id="fullLink" href="#" target="_blank" rel="noopener" aria-label="Open notes in a full tab" title="Open in full tab">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-8 8M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="studybar__progress" aria-hidden="true"><i id="readBar"></i></div>
+  </header>
+
+  <main class="reader" id="main">
+    <!-- loading state (notes are 6–10 MB: images are embedded) -->
+    <div class="reader__loading" id="loading" role="status" aria-live="polite">
+      <span class="reader__spinner" aria-hidden="true"></span>
+      <p class="h-sm" id="loadingTitle">Opening notes…</p>
+      <p class="muted body-sm">Diagrams are packed into the page, so the first open can take a few seconds.</p>
+    </div>
+    <div class="reader__resume" id="resume" hidden>
+      <span class="body-sm">Continue where you left off?</span>
+      <button class="btn btn--primary btn--sm" type="button" id="resumeYes">Continue</button>
+      <button class="btn btn--link body-sm" type="button" id="resumeNo">Start from top</button>
+    </div>
+    <iframe class="reader__frame" id="frame" title="Study notes" hidden></iframe>
+
+    <!-- error / not found -->
+    <div class="reader__empty" id="empty" hidden>
+      <p class="eyebrow">Not found</p>
+      <h2 class="h-md">These notes aren't here yet.</h2>
+      <p class="muted">The subject link may be old, or notes for it haven't been added.</p>
+      <a class="btn btn--primary" href="courses.html#mca">Back to my courses</a>
+    </div>
+  </main>
+
+  <script src="courses-data.js?v=5.8"></script>
+  <script src="study.js?v=5.8"></script>
+</body>
+</html>

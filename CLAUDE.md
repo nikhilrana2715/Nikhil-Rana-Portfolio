@@ -13,6 +13,10 @@ Static site: vanilla **HTML + CSS + JS**, no build step, no framework. Deploy to
 ## File structure
 ```
 index.html     # all sections
+courses.html   # My courses page (MCA / BCA → semesters → subjects), logic in courses.js
+courses-data.js # all course / semester / subject data (edit here)
+study.html     # study reader for one subject's notes (study.js)
+notes/         # notes/mca/syllabus.pdf + notes/mca/sem-1/*.html (Nikhil's notes)
 tokens.css     # color / type / space / radius / shadow tokens (+ dark mode)
 style.css      # components + layout, references tokens only
 script.js      # nav toggle, scroll reveal, active link, theme toggle, contact form (FormSubmit.co)
@@ -104,7 +108,24 @@ CSS classes mirror these: `.btn.btn--primary`, `.chip.chip--dark`, `.card--note`
 2. Credentials → Create credentials → OAuth client ID → Web application. Authorized JavaScript origins: `http://localhost:8000`, `https://nikhilrana2715.github.io` (+ any custom domain). No redirect URIs needed.
 3. Copy the Client ID (`…apps.googleusercontent.com`, public — not a secret) into `GOOGLE_CLIENT_ID`. Bump `?v=`.
 
+## v5.7 — My courses page (`courses.html` + `courses.js`)
+- Nav link "My courses" (home nav + CTA footer "Navigate") → separate page `courses.html` (own nav with `index.html#…` links, clock pill, burger; theme read from `localStorage theme` before paint — no pull cord there). Does **not** load `script.js`.
+- Flow: `Card / Program` (MCA, BCA) → click → hash `#mca` / `#bca` (Back button works) → `Progress / Semesters` strip + `Accordion / Semester` (`<details>`), current semester open. `Status` chip: Completed / In progress / Upcoming.
+- Data now in `courses-data.js` (v5.8). Add a course = add an object (`tone`: rust / navy / sage).
+- **Placeholders — confirm with Nikhil:** semester years guessed (MCA 2026/27/27/28, BCA 2023→2026); BCA subjects + college empty.
+- CSS at end of `style.css` (tokens only, reuses `--door-*` for badge tone).
+
+## v5.8 — Subject notes + Study reader (`courses-data.js`, `study.html` + `study.js`, `notes/`)
+- **Data moved to `courses-data.js`** (`window.COURSES`, shared by courses.js + study.js). Real JRU syllabus data ("MCA 2025-2027 Syllabus", `notes/mca/syllabus.pdf`): all 4 MCA semesters with codes, credits, type (theory/lab/project/elective), syllabus PDF page. University = Jharkhand Rai University.
+- Notes = Nikhil's own self-contained HTML files (6–10 MB, images base64), copied from `Semester -1/` to `notes/mca/sem-1/{adbms,os,coa,ads,soft-skills,cbhd-1}.html`. Discrete Maths + labs have no notes yet ("Notes coming" + syllabus page link). Add notes: drop file in `notes/mca/sem-N/`, set `notes:` on the subject.
+- `Card / Subject` grid in each semester (code, type, credits, unit list, "Study notes →"); practicals listed separately.
+- `study.html?c=mca&s=1&sub=os` = `Bar / Study` (back to `courses.html#mca-sem-1`, crumb + name, `Select / Unit` built from the notes' own `<h2>`s, syllabus page ↗, prev/next subject with notes, open full tab) + reading progress line + notes in same-origin iframe. Remembers scroll per subject in `localStorage nr-study:<c>/<s>/<sub>` → "Continue where you left off?" pill.
+- `courses.html#mca-sem-1` deep link opens + scrolls to that semester.
+- Note files keep their own design (Poppins/Lora, own dark toggle) — they're Nikhil's, don't restyle. COA notes overflow ~11px at 360px inside the frame (their own CSS).
+
 ## Changelog
+- **v5.8 (2026-11-22):** MCA Sem 1 subject notes + study reader; full MCA subject list from syllabus. See section above.
+- **v5.7 (2026-11-22):** My courses page — MCA (4 sem) + BCA (6 sem), semester accordion. See section above.
 - **v5.6 (2026-11-22):** Verify works without Google too. If `GOOGLE_CLIENT_ID` is empty, Verify runs a **smart check** (all local rules + live MX lookup, min 1.2 s) → ✓ Verified / reject popup. Once the Client ID is set, the Google sign-in match is used instead (stricter: proves ownership). The mail to Nikhil says which check passed. Limit of smart mode: a well-formed address on a real domain (e.g. someone else's real Gmail) passes; only Google mode blocks that.
 - **v5.5 (2026-11-21):** resume gate = **Verify button + Google sign-in check** (Nikhil: no auto "Verified", real Google verification, submit locked until verified). `Button / Verify` inside email field (G icon) → instant local checks (typo → popup with "Use fix", provider rules, mash, temp/fake) → Google Identity Services token popup (`hint` = typed email, `select_account`) → `userinfo` email must equal typed email (Gmail dots / +tags ignored, `email_verified` true) → token revoked → "✓ Verified" chip, View resume enabled. Min 1.2 s "Verifying…". Mismatch / cancel / popup blocked / dead domain → `Alert / Error` popup "This email isn't verified … try a different email linked to your Google account". Editing email resets verification. Mail to Nikhil adds "Verified with Google sign-in ✓" + Google account name. Non-Google emails (Outlook personal etc.) can't pass — by design. Needs `GOOGLE_CLIENT_ID` (see setup above).
 - **v5.4 (2026-11-21):** gate re-test fixes — disposable/fake domains checked before fuzzy typo fix (yopmail was "corrected" to hotmail); form fully reset on every open; empty submit shows name + email errors together; error popup scrolls sheet to top (mobile). Verified: hero + vault buttons, Esc / × / backdrop close (vault stays open under gate), focus return, 360px no h-scroll, dark mode.

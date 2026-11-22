@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My courses — Nikhil Rana</title>
+  <meta name="description" content="Nikhil Rana's study path — MCA (2026–2028) and BCA (2023–2026), semester by semester.">
+  <meta property="og:title" content="My courses — Nikhil Rana">
+  <meta property="og:description" content="MCA and BCA, semester by semester.">
+  <meta property="og:image" content="assets/og.jpg">
+  <link rel="icon" href="assets/img7.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <!-- set theme before paint (same localStorage key as the home page pull cord) -->
+  <script>try { document.documentElement.dataset.theme = localStorage.getItem('theme') || 'light'; } catch (e) { document.documentElement.dataset.theme = 'light'; }</script>
+  <link rel="stylesheet" href="tokens.css?v=5.8">
+  <link rel="stylesheet" href="style.css?v=5.8">
+</head>
+<body id="top" class="page-courses">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <!-- Nav / Header -->
+  <header class="nav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo" aria-label="Nikhil Rana, home">Nikhil Rana<span>.</span></a>
+      <nav aria-label="Primary">
+        <ul class="nav__links" id="navLinks">
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#story">My story</a></li>
+          <li><a href="index.html#skills">Skills</a></li>
+          <li><a href="index.html#work">Work</a></li>
+          <li><a href="index.html#certs">Certifications</a></li>
+          <li><a href="courses.html" class="is-active" aria-current="page">My courses</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="nav__actions">
+        <div class="clock-pill" aria-label="Your local time">
+          <span class="muted js-city">Local time</span><b class="js-time">--:--</b><span class="clock-pill__sep">·</span><span class="js-date">--</span>
+        </div>
+        <a href="index.html#contact" class="btn btn--primary btn--sm nav__cta">Let's talk</a>
+        <button class="icon-btn nav__burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Intro -->
+    <section class="courses-hero">
+      <div class="container">
+        <a href="index.html" class="back-link">← Back to home</a>
+        <p class="eyebrow">My courses</p>
+        <h1 class="display--sm courses-hero__title">What I'm studying,<br><span class="muted">semester by semester.</span></h1>
+        <p class="lead courses-hero__lead">Pick a course to open its semesters. Each semester lists its subjects — open one to read my full notes for it.</p>
+      </div>
+    </section>
+
+    <!-- Card / Program — one per course, rendered by courses.js -->
+    <section class="section courses-pick" aria-labelledby="pickTitle">
+      <div class="container">
+        <h2 class="caption" id="pickTitle">Choose a course</h2>
+        <div class="programs" id="programs" role="list"></div>
+      </div>
+    </section>
+
+    <!-- Selected course: progress + semesters -->
+    <section class="section section--tint course" id="course" aria-live="polite" hidden>
+      <div class="container">
+        <header class="course__head">
+          <div>
+            <p class="eyebrow" id="courseKicker"></p>
+            <h2 class="h-lg" id="courseTitle" tabindex="-1"></h2>
+            <p class="lead" id="courseLead"></p>
+          </div>
+          <dl class="course__meta" id="courseMeta"></dl>
+        </header>
+        <ol class="sem-progress" id="semProgress" aria-label="Semester progress"></ol>
+        <div class="sems" id="sems"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="muted body-sm">© <span id="year">2026</span> Nikhil Rana</p>
+      <a href="index.html" class="btn btn--link">Back to portfolio</a>
+    </div>
+  </footer>
+
+  <script src="courses-data.js?v=5.8"></script>
+  <script src="courses.js?v=5.8"></script>
+</body>
+</html>
