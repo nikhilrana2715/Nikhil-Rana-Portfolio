@@ -327,7 +327,7 @@
      (apps-script/consent-logger.gs). Empty URL = logging off. One row per visitor ID:
      consent choice creates it; resume gate + contact form fill Name / Email on the same row.
      Location (IP city) + network/company are logged for every entry (disclosed in banner). */
-  const CONSENT_LOG_URL = '';
+  const CONSENT_LOG_URL = 'https://script.google.com/macros/s/AKfycbxoSnY0qp7VgPCew52AmKOmHJkleA0jTQDFWCsi69C1ktoEE-NmN6bbP1aykuROmFc1/exec';
   const visitorId = () => {
     let id = null;
     try { id = localStorage.getItem('nr-vid'); } catch (e) {}
