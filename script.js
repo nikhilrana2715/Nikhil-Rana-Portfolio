@@ -302,19 +302,92 @@
     if (g.timezone && g.timezone !== tz) { tz = g.timezone; makeFmts(); tick(); }
     showLoc({ city: g.city || g.region, cc: g.country_code, lat: g.latitude, lon: g.longitude });
   };
-  let cached = null;
-  try { cached = JSON.parse(sessionStorage.getItem('nr-geo')); } catch (e) {}
-  if (cached) applyGeo(cached);
-  else if ('fetch' in window) {
-    fetch('https://get.geojs.io/v1/ip/geo.json', { cache: 'no-store' })
+  // IP lookup only after the visitor chose "Accept all" in Banner / Consent
+  // Returns a promise of the geo object (or null). apply=false → only fetch (for the visitor log),
+  // don't personalise the clock.
+  const loadGeo = (apply = true) => {
+    let cached = null;
+    try { cached = JSON.parse(sessionStorage.getItem('nr-geo')); } catch (e) {}
+    if (cached && 'org' in cached) { if (apply) applyGeo(cached); return Promise.resolve(cached); }
+    if (!('fetch' in window)) return Promise.resolve(null);
+    return fetch('https://get.geojs.io/v1/ip/geo.json', { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(g => {
-        if (!g) return;
-        const keep = { city: g.city, region: g.region, country_code: g.country_code, latitude: g.latitude, longitude: g.longitude, timezone: g.timezone };
+        if (!g) return null;
+        const org = String(g.organization_name || g.organization || '').replace(/^AS\d+\s*/i, '');
+        const keep = { city: g.city, region: g.region, country_code: g.country_code, latitude: g.latitude, longitude: g.longitude, timezone: g.timezone, org };
         try { sessionStorage.setItem('nr-geo', JSON.stringify(keep)); } catch (e) {}
-        applyGeo(keep);
+        if (apply) applyGeo(keep);
+        return keep;
       })
-      .catch(() => {});
+      .catch(() => null);
+  };
+
+  /* Visitor log → Google Sheet "Portfolio — Visitor consent log" via Apps Script web app
+     (apps-script/consent-logger.gs). Empty URL = logging off. One row per visitor ID:
+     consent choice creates it; resume gate + contact form fill Name / Email on the same row.
+     Location (IP city) + network/company are logged for every entry (disclosed in banner). */
+  const CONSENT_LOG_URL = '';
+  const visitorId = () => {
+    let id = null;
+    try { id = localStorage.getItem('nr-vid'); } catch (e) {}
+    if (!id) {
+      const b = new Uint8Array(12);
+      (window.crypto || window.msCrypto).getRandomValues(b);
+      id = Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+      try { localStorage.setItem('nr-vid', id); } catch (e) {}
+    }
+    return id;
+  };
+  const shortUA = () => {
+    const ua = navigator.userAgent;
+    const br = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /SamsungBrowser/.test(ua) ? 'Samsung' :
+      /Chrome\//.test(ua) ? 'Chrome' : /Firefox\//.test(ua) ? 'Firefox' : /Safari\//.test(ua) ? 'Safari' : 'Other';
+    const os = /Android/.test(ua) ? 'Android' : /iPhone|iPad|iPod/.test(ua) ? 'iOS' : /Windows/.test(ua) ? 'Windows' :
+      /Mac OS X/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : 'Other';
+    return `${br} · ${os}`;
+  };
+  // type: 'consent' | 'resume' | 'contact'; extra: { choice } or { name, email }
+  const logVisitor = (type, extra = {}) => {
+    if (!CONSENT_LOG_URL) return;
+    loadGeo(false).then(geo => sendLog(type, extra, geo || {}));
+  };
+  window.nrLogVisitor = logVisitor;   // used by the resume gate + contact form below
+  const sendLog = (type, extra, g) => {
+    const data = new URLSearchParams({
+      type, vid: visitorId(),
+      choice: extra.choice || '', name: extra.name || '', email: extra.email || '',
+      city: g.city || '', region: g.region || '', country: g.country_code || '', org: g.org || '',
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      device: matchMedia('(pointer: coarse)').matches ? (Math.min(screen.width, screen.height) >= 600 ? 'Tablet' : 'Mobile') : 'Desktop',
+      browser: shortUA(), screen: `${screen.width}×${screen.height}`,
+      lang: navigator.language || '', ref: document.referrer || 'Direct', page: location.pathname + location.hash
+    });
+    fetch(CONSENT_LOG_URL, { method: 'POST', mode: 'no-cors', keepalive: true, body: data }).catch(() => {});
+  };
+
+  /* ---------- Banner / Consent (v5.9) ----------
+     localStorage nr-consent = "all" | "essential". Shown until a choice is made. */
+  const CONSENT_KEY = 'nr-consent';
+  const getConsent = () => { try { return localStorage.getItem(CONSENT_KEY); } catch (e) { return null; } };
+  const consentEl = document.getElementById('consent');
+  const consent = getConsent();
+  if (consent === 'all') loadGeo();
+  else if (!consent && consentEl) {
+    setTimeout(() => {
+      consentEl.hidden = false;
+      requestAnimationFrame(() => consentEl.classList.add('is-in'));
+    }, 900);
+    consentEl.addEventListener('click', e => {
+      const btn = e.target.closest('[data-consent]');
+      if (!btn) return;
+      const choice = btn.dataset.consent;
+      try { localStorage.setItem(CONSENT_KEY, choice); } catch (err) { /* private mode */ }
+      if (choice === 'all') loadGeo();   // personalise clock
+      logVisitor('consent', { choice });
+      consentEl.classList.remove('is-in');
+      setTimeout(() => { consentEl.hidden = true; }, 320);
+    });
   }
 
   /* ---------- Story timeline ---------- */
@@ -746,6 +819,7 @@
     }
     const { name, email, message, _honey } = Object.fromEntries(new FormData(form));
     if (_honey) return; // bot filled the hidden trap field
+    if (window.nrLogVisitor) window.nrLogVisitor('contact', { name, email });
     sending = true;
     sendBtn.disabled = true;
     const label = sendBtn.textContent;
@@ -1171,6 +1245,7 @@
     /* --- Unlock: open resume right away --- */
     const unlock = (name, email, opened, googleName) => {
       notifyView(name, email, googleName);
+      if (window.nrLogVisitor) window.nrLogVisitor('resume', { name, email });
       document.getElementById('gateWho').textContent = name.split(' ')[0];
       document.getElementById('gateDoneLead').textContent = opened
         ? 'Your resume just opened in a new tab. Didn\'t see it? Open it again below.'
