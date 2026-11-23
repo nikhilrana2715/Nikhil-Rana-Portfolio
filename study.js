@@ -28,6 +28,10 @@
     $('sylLink').href = `${c.syllabus}${sub.page ? `#page=${sub.page}` : ''}`;
     $('sylLink').hidden = false;
   }
+  if (sub.practice) {
+    $('practiceLink').href = sub.practice;
+    $('practiceLink').hidden = false;
+  }
 
   // prev / next = other subjects in this semester that have notes
   const list = s.subjects.filter((x) => x.notes);

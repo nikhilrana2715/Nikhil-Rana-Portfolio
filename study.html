@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
   <script>try { document.documentElement.dataset.theme = localStorage.getItem('theme') || 'light'; } catch (e) { document.documentElement.dataset.theme = 'light'; }</script>
-  <link rel="stylesheet" href="tokens.css?v=5.8">
-  <link rel="stylesheet" href="style.css?v=5.8">
+  <link rel="stylesheet" href="tokens.css?v=6.0">
+  <link rel="stylesheet" href="style.css?v=6.0">
 </head>
 <body class="page-study">
   <!-- Bar / Study -->
@@ -31,6 +31,7 @@
           <span class="sr-only">Jump to unit</span>
           <select id="unitSelect"></select>
         </label>
+        <a class="btn btn--secondary btn--sm studybar__syl" id="practiceLink" href="#" target="_blank" rel="noopener" hidden>Practice set ↗</a>
         <a class="btn btn--secondary btn--sm studybar__syl" id="sylLink" href="#" target="_blank" rel="noopener" hidden>Syllabus ↗</a>
         <span class="studybar__pager">
           <a class="icon-btn" id="prevSub" href="#" aria-label="Previous subject" title="Previous subject">
@@ -71,7 +72,7 @@
     </div>
   </main>
 
-  <script src="courses-data.js?v=5.8"></script>
-  <script src="study.js?v=5.8"></script>
+  <script src="courses-data.js?v=6.0"></script>
+  <script src="study.js?v=6.0"></script>
 </body>
 </html>

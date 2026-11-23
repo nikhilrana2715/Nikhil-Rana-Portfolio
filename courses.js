@@ -1,4 +1,4 @@
-// Nikhil Rana Portfolio — My courses page (v5.8). Data lives in courses-data.js.
+// Nikhil Rana Portfolio — My courses page (v6.0). Data lives in courses-data.js.
 (() => {
   const PROGRAMS = window.COURSES;
   const STATUS = window.COURSE_STATUS;
@@ -99,6 +99,40 @@
       </div></li>`;
   };
 
+  /* ---------- List / Practice — exam practice sets (PDF, new tab) ---------- */
+  const pdfIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>';
+  // A semester with `practiceTitle` lists every theory / elective subject:
+  // with `practice` → PDF link, without → "Coming soon" slot (fills in once the PDF path is set).
+  const practiceBlock = (s) => {
+    const slots = s.practiceTitle
+      ? s.subjects.filter((x) => x.practice || x.type === 'theory' || x.type === 'elective')
+      : s.subjects.filter((x) => x.practice);
+    if (!slots.length) return '';
+    const ready = slots.filter((x) => x.practice).length;
+    const text = (x, i) => `
+            <span class="practice__icon">${pdfIcon}</span>
+            <span class="practice__text">
+              <span class="practice__code mono">${pad(i + 1)} · ${esc(x.code)}</span>
+              <span class="practice__name">${esc(x.short || x.name)}</span>
+            </span>`;
+    return `
+      <div class="practice">
+        <div class="practice__head">
+          <p class="caption">Exam prep · Practice sets · ${ready === slots.length ? ready : `${ready} / ${slots.length}`}</p>
+          ${s.practiceTitle ? `<p class="practice__exam body-sm muted">${esc(s.practiceTitle)}</p>` : ''}
+        </div>
+        <ul class="practice__list">${slots.map((x, i) => x.practice ? `
+          <li><a class="practice__item" href="${esc(x.practice)}" target="_blank" rel="noopener" aria-label="${esc(x.name)} practice set (PDF, opens in new tab)">${text(x, i)}
+            <span class="practice__cta body-sm">Open PDF <span aria-hidden="true">↗</span></span>
+          </a></li>` : `
+          <li><div class="practice__item practice__item--soon">${text(x, i)}
+            <span class="practice__cta body-sm"><span class="practice__cta-long">Coming </span>soon</span>
+          </div></li>`).join('')}
+        </ul>
+        <p class="practice__note body-sm muted">${ready ? 'Practice only — the real exam questions will differ.' : 'Practice sets will be added before the exams.'}</p>
+      </div>`;
+  };
+
   /* ---------- Selected course: progress + Accordion / Semester ---------- */
   const courseEl = $('course');
   let current = null;
@@ -124,9 +158,10 @@
       const labs = s.subjects.filter((x) => x.type === 'lab');
       const credits = s.subjects.reduce((a, x) => a + (x.credits || 0), 0);
       const withNotes = s.subjects.filter((x) => x.notes).length;
+      const withPractice = s.subjects.filter((x) => x.practice).length;
       const summary = s.subjects.length
         ? `<div class="sem__summary">
-             <span class="sem__facts body-sm"><b>${s.subjects.length}</b> subjects · <b>${credits}</b> credits${withNotes ? ` · <b>${withNotes}</b> with notes` : ''}</span>
+             <span class="sem__facts body-sm"><b>${s.subjects.length}</b> subjects · <b>${credits}</b> credits${withNotes ? ` · <b>${withNotes}</b> with notes` : ''}${withPractice ? ` · <b>${withPractice}</b> practice sets` : ''}</span>
              ${syllabusLink(p, null, 'Full syllabus')}
            </div>`
         : '';
@@ -134,14 +169,15 @@
         ? `${summary}
            <p class="caption">Subjects · ${main.length}</p>
            <ul class="subjects">${main.map((x) => subjectCard(p, s, x)).join('')}</ul>
-           ${labs.length ? `<p class="caption sem__sub">Practicals · ${labs.length}</p><ul class="subjects subjects--labs">${labs.map((x) => subjectCard(p, s, x)).join('')}</ul>` : ''}`
+           ${labs.length ? `<p class="caption sem__sub">Practicals · ${labs.length}</p><ul class="subjects subjects--labs">${labs.map((x) => subjectCard(p, s, x)).join('')}</ul>` : ''}
+           ${practiceBlock(s)}`
         : `<p class="sem__empty muted body-sm">Subjects will be added soon.</p>`;
       const open = s.status === 'now' || (!pr.now && s.n === pr.total);
       return `
         <details class="sem is-${s.status}" id="${p.id}-sem-${s.n}"${open ? ' open' : ''}>
           <summary class="sem__head">
             <span class="sem__n mono">${pad(s.n)}</span>
-            <span class="sem__title">Semester ${s.n}${withNotes ? `<span class="sem__badge">${withNotes} notes</span>` : ''}</span>
+            <span class="sem__title">Semester ${s.n}${withNotes ? `<span class="sem__badge">${withNotes} notes</span>` : ''}${withPractice ? `<span class="sem__badge sem__badge--soft">${withPractice} practice</span>` : ''}</span>
             <span class="sem__year mono">${esc(s.year)}</span>
             <span class="status status--${s.status}">${STATUS[s.status]}</span>
             <span class="sem__chev" aria-hidden="true"></span>
