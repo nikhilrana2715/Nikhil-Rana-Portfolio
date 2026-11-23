@@ -63,20 +63,61 @@ function doPost(e) {
       for (let i = 0; i < ids.length; i++) if (ids[i][0] === vid) { at = i + 2; break; }
     }
 
+    let row, num;
     if (at > 0) {
       // Merge: only overwrite cells that have a new non-empty value
       const cur = sh.getRange(at, 1, 1, head.length).getValues()[0];
-      const row = head.map((h, i) => (rec[h] ? rec[h] : cur[i]));
+      row = head.map((h, i) => (rec[h] ? rec[h] : cur[i]));
       sh.getRange(at, 1, 1, head.length).setValues([row]);
+      num = cur[0];
     } else {
-      const row = head.map(h => (h === '#' ? last : rec[h] || ''));   // # = running number (header is row 1)
+      // New visitor → new row at the bottom; earlier rows are never touched
+      num = last;   // # = running number (header is row 1)
+      row = head.map(h => (h === '#' ? num : rec[h] || ''));
       sh.appendRow(row);
     }
+    notify(type, at < 0, num, head, row);
   } finally {
     lock.releaseLock();
   }
   return out('ok');
 }
+
+/* Email the sheet owner (Execute as: Me → that's Nikhil) on every new / updated row.
+   No address in code (repo is public). Gmail quota ~100 mails/day on a free account. */
+function notify(type, isNew, num, head, row) {
+  try {
+    const to = Session.getEffectiveUser().getEmail();
+    if (!to) return;
+    const v = h => String(row[head.indexOf(h)] || '');
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const place = [v('City'), v('Country')].filter(Boolean).join(', ') || 'unknown place';
+    const who = v('Name') ? `${v('Name')} (${v('Email')})` : 'Anonymous visitor';
+    const what = type === 'resume' ? 'viewed your resume'
+      : type === 'contact' ? 'sent a message'
+      : isNew ? `new visitor · ${v('Choice')}` : `visited again · ${v('Choice')}`;
+    const subject = `Portfolio #${num}: ${who} ${what} — ${place}`;
+
+    const rows = head.filter(h => h !== '#' && v(h)).map(h =>
+      `<tr><td style="padding:6px 12px;color:#7D7773;white-space:nowrap">${esc(h)}</td>` +
+      `<td style="padding:6px 12px;color:#1A1818">${esc(v(h))}</td></tr>`).join('');
+    const html =
+      `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1A1818">` +
+      `<p style="margin:0 0 12px"><b>${esc(who)}</b> ${esc(what)} — ${esc(place)}</p>` +
+      `<table style="border-collapse:collapse;background:#F5F1EC;border-radius:8px">${rows}</table>` +
+      `<p style="margin:16px 0 0"><a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit">Open the full sheet</a></p></div>`;
+
+    const opts = { to, subject, htmlBody: html, name: 'Portfolio Visitor Log' };
+    const email = v('Email');
+    if (/^\S+@\S+\.\S+$/.test(email)) opts.replyTo = email;   // Reply goes to the visitor
+    MailApp.sendEmail(opts);
+  } catch (err) {
+    console.error('notify failed: ' + err);   // never block the sheet write
+  }
+}
+
+/* Run once from the editor (select "authorize" → Run) to grant the Send email permission. */
+function authorize() { MailApp.getRemainingDailyQuota(); SpreadsheetApp.openById(SHEET_ID); }
 
 function doGet() { return out('Visitor logger is running.'); }
 
