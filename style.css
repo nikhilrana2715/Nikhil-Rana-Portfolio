@@ -1090,6 +1090,31 @@ html:has(.gate[open]) { overflow: hidden; }
 .subjects--labs .subject__name { font-size: var(--fs-body); }
 @media (prefers-reduced-motion: reduce) { .subject--notes:hover, .subject--notes:focus-visible { transform: none; } }
 
+/* Subject details reveal (v6.1) — meta + units hidden at rest, slide open on
+   hover / focus. Only on mouse screens; touch keeps everything visible. */
+.subject__more { display: grid; grid-template-rows: 1fr; }
+.subject__more-in { display: flex; flex-direction: column; gap: var(--space-xs); min-height: 0; overflow: hidden; }
+@media (hover: hover) and (pointer: fine) {
+  .subjects { align-items: start; }
+  .subject { height: auto; }
+  .subject__name { min-height: 2.5em; }
+  .subject__more { grid-template-rows: 0fr; transition: grid-template-rows .45s var(--ease); }
+  .subject__more-in { opacity: 0; transform: translateY(-6px); transition: opacity .3s var(--ease), transform .35s var(--ease); }
+  .subject__units li { opacity: 0; transform: translateX(-8px); transition: opacity .3s var(--ease), transform .3s var(--ease); }
+  .subject:hover .subject__more, .subject:focus-visible .subject__more, .subject:focus-within .subject__more { grid-template-rows: 1fr; }
+  .subject:hover .subject__more-in, .subject:focus-visible .subject__more-in, .subject:focus-within .subject__more-in { opacity: 1; transform: none; transition-delay: .08s; }
+  .subject:hover .subject__units li, .subject:focus-visible .subject__units li, .subject:focus-within .subject__units li { opacity: 1; transform: none; }
+  .subject:hover .subject__units li:nth-child(1), .subject:focus-within .subject__units li:nth-child(1) { transition-delay: .12s; }
+  .subject:hover .subject__units li:nth-child(2), .subject:focus-within .subject__units li:nth-child(2) { transition-delay: .17s; }
+  .subject:hover .subject__units li:nth-child(3), .subject:focus-within .subject__units li:nth-child(3) { transition-delay: .22s; }
+  .subject:hover .subject__units li:nth-child(4), .subject:focus-within .subject__units li:nth-child(4) { transition-delay: .27s; }
+  .subject:hover .subject__units li:nth-child(5), .subject:focus-within .subject__units li:nth-child(5) { transition-delay: .32s; }
+  .subject:hover .subject__units li:nth-child(n+6), .subject:focus-within .subject__units li:nth-child(n+6) { transition-delay: .37s; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+  .subject__more, .subject__more-in, .subject__units li { transition: none !important; transform: none !important; }
+}
+
 /* v6.0 — List / Practice (exam practice sets, PDFs) */
 .sem__badge--soft { background: transparent; color: var(--color-on-surface); box-shadow: inset 0 0 0 1px var(--color-tertiary); }
 .practice { margin-top: var(--space-md); }

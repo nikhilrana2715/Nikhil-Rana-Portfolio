@@ -80,21 +80,24 @@
         <span class="subject__code mono">${esc(x.code)}</span>
         <span class="subject__type">${TYPE[x.type] || ''}</span>
       </span>
-      <span class="subject__name">${esc(x.name)}</span>
-      ${meta ? `<span class="subject__meta muted body-sm">${esc(meta)}</span>` : ''}`;
+      <span class="subject__name">${esc(x.name)}</span>`;
+    // Details (meta + units) sit in `.subject__more`: hidden at rest on
+    // hover-capable screens, slide open on hover / keyboard focus.
+    const metaHtml = meta ? `<span class="subject__meta muted body-sm">${esc(meta)}</span>` : '';
+    const more = (inner) => inner ? `<span class="subject__more"><span class="subject__more-in">${inner}</span></span>` : '';
     if (x.notes) {
       const units = x.units?.length
         ? `<ol class="subject__units" aria-label="Units">${x.units.map((u, i) => `<li><b>${pad(i + 1)}</b>${esc(u)}</li>`).join('')}</ol>`
         : '';
       return `
         <li><a class="subject subject--notes" href="study.html?c=${p.id}&amp;s=${s.n}&amp;sub=${x.id}">
-          ${head}${units}
+          ${head}${more(metaHtml + units)}
           <span class="subject__cta">Study notes ${arrow}</span>
         </a></li>`;
     }
     return `
       <li><div class="subject subject--soon">
-        ${head}
+        ${head}${more(metaHtml)}
         <span class="subject__foot"><span class="subject__soon">Notes coming</span>${syllabusLink(p, x.page)}</span>
       </div></li>`;
   };

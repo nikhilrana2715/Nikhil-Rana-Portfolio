@@ -294,15 +294,64 @@
   // Instant guess from timezone name, e.g. "America/New_York" -> "New York"
   // (browser language is NOT a location — en-US phones in India would show "US")
   const TZ_ALIAS = { Calcutta: 'Kolkata', Saigon: 'Ho Chi Minh', Katmandu: 'Kathmandu', Rangoon: 'Yangon', Kiev: 'Kyiv' };
+  // One timezone for a whole country → the zone's city says nothing about where
+  // the visitor is (every Indian visitor would see "Kolkata"). Show the country.
+  const TZ_COUNTRY = {
+    'Asia/Kolkata': 'India', 'Asia/Calcutta': 'India', 'Asia/Karachi': 'Pakistan', 'Asia/Dhaka': 'Bangladesh',
+    'Asia/Kathmandu': 'Nepal', 'Asia/Katmandu': 'Nepal', 'Asia/Colombo': 'Sri Lanka', 'Asia/Dubai': 'UAE',
+    'Asia/Riyadh': 'Saudi Arabia', 'Asia/Qatar': 'Qatar', 'Asia/Singapore': 'Singapore', 'Asia/Tokyo': 'Japan',
+    'Asia/Shanghai': 'China', 'Asia/Seoul': 'South Korea', 'Asia/Manila': 'Philippines', 'Europe/London': 'UK',
+    'Europe/Paris': 'France', 'Europe/Berlin': 'Germany', 'Europe/Rome': 'Italy', 'Europe/Amsterdam': 'Netherlands',
+    'Africa/Lagos': 'Nigeria', 'Africa/Nairobi': 'Kenya', 'Africa/Johannesburg': 'South Africa'
+  };
   const tzCity = (tz.split('/').pop() || '').replace(/_/g, ' ');
-  showLoc({ city: TZ_ALIAS[tzCity] || tzCity, cc: '' });
+  showLoc({ city: TZ_COUNTRY[tz] || TZ_ALIAS[tzCity] || tzCity, cc: '' });
 
+  let precise = false;   // GPS / Wi-Fi location shown → IP result must not overwrite it
   const applyGeo = g => {
-    if (!g) return;
+    if (!g || precise) return;
     if (g.timezone && g.timezone !== tz) { tz = g.timezone; makeFmts(); tick(); }
     showLoc({ city: g.city || g.region, cc: g.country_code, lat: g.latitude, lon: g.longitude });
   };
-  // IP lookup only after the visitor chose "Accept all" in Banner / Consent
+
+  /* Exact location (v6.2): browser Geolocation (GPS / Wi-Fi, asks permission) →
+     city name via BigDataCloud's free client-side reverse geocoder (no key).
+     Only after "Accept all"; shown on the page only, never logged.
+     ask=false → use it only if permission was already granted (no prompt). */
+  const loadPrecise = (ask = true) => {
+    if (!navigator.geolocation) return;
+    let cached = null;
+    try { cached = JSON.parse(sessionStorage.getItem('nr-geo-precise')); } catch (e) {}
+    const show = p => { precise = true; showLoc(p); };
+    if (cached) return show(cached);
+    const run = () => navigator.geolocation.getCurrentPosition(pos => {
+      const { latitude: lat, longitude: lon } = pos.coords;
+      fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)
+        .then(r => r.ok ? r.json() : null)
+        .then(d => {
+          if (!d) return;
+          const p = { city: d.city || d.locality || d.principalSubdivision || '', cc: d.countryCode || '', lat, lon };
+          try { sessionStorage.setItem('nr-geo-precise', JSON.stringify(p)); } catch (e) {}
+          show(p);
+        })
+        .catch(() => {});
+    }, () => { /* denied / unavailable → IP city stays */ }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+    const ASKED = 'nr-geo-asked';
+    if (ask) { try { localStorage.setItem(ASKED, '1'); } catch (e) {} return run(); }
+    if (navigator.permissions?.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then(s => {
+        if (s.state === 'granted') return run();
+        // Returning visitor who was never asked (banner answered before v6.2):
+        // ask once on their first click / tap (browsers hide prompts without a gesture).
+        let asked = null;
+        try { asked = localStorage.getItem(ASKED); } catch (e) {}
+        if (s.state === 'prompt' && !asked) {
+          addEventListener('pointerdown', () => loadPrecise(true), { once: true, capture: true });
+        }
+      }).catch(() => {});
+    }
+  };
+  // IP lookup after the visitor answered Banner / Consent (either choice).
   // Returns a promise of the geo object (or null). apply=false → only fetch (for the visitor log),
   // don't personalise the clock.
   const loadGeo = (apply = true) => {
@@ -372,8 +421,10 @@
   const getConsent = () => { try { return localStorage.getItem(CONSENT_KEY); } catch (e) { return null; } };
   const consentEl = document.getElementById('consent');
   const consent = getConsent();
-  if (consent === 'all') loadGeo();
-  else if (!consent && consentEl) {
+  // Either choice → IP city on the clock (the visit log fetches it anyway, disclosed in banner).
+  // Exact GPS / Wi-Fi location for both choices (browser asks the visitor; silent later if granted).
+  if (consent) { loadGeo(); loadPrecise(false); }
+  if (!consent && consentEl) {
     setTimeout(() => {
       consentEl.hidden = false;
       requestAnimationFrame(() => consentEl.classList.add('is-in'));
@@ -383,7 +434,8 @@
       if (!btn) return;
       const choice = btn.dataset.consent;
       try { localStorage.setItem(CONSENT_KEY, choice); } catch (err) { /* private mode */ }
-      if (choice === 'all') loadGeo();   // personalise clock
+      loadGeo();                                // IP city on the clock
+      loadPrecise(true);                        // ask for exact location (either choice)
       logVisitor('consent', { choice });
       consentEl.classList.remove('is-in');
       setTimeout(() => { consentEl.hidden = true; }, 320);
