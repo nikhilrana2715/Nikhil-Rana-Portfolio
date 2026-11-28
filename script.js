@@ -59,7 +59,8 @@
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       const mobile = W <= 860;
       const right = mobile ? 64 : Math.min(96, Math.max(64, W * 0.06));
-      const len = mobile ? 72 : Math.min(230, Math.max(110, H * 0.26));
+      // phones: short rope so the bob rests inside the nav bar instead of covering content (v6.8)
+      const len = mobile ? 34 : Math.min(230, Math.max(110, H * 0.26));
       const ax = W - right - 22;
       const dx = ax - anchor.x;
       anchor = { x: ax, y: -4 };
@@ -740,10 +741,53 @@
       doors.forEach(d => d.classList.toggle('is-active', d === door));
       panels.forEach(p => p.classList.toggle('is-on', !!door && p.dataset.for === door.dataset.room));
     };
+    /* Door springs (v6.5): each leaf is a damped spring in degrees, not a CSS easing, so it has
+       weight — it lags the cursor, overshoots when shoved and settles. Writes the leaf rotateY and
+       --open (0…1) which drives shading, lamp, room name and the floor light wedge in CSS. */
+    const OPEN = 114;                                  // fully open angle
+    const SOFT = { k: 140, c: 19 };                    // hover: follows the hand, barely overshoots
+    const LATCH = { k: 520, c: 26 };                   // latch "give" right after the handle turns
+    const SHOVE = { k: 62, c: 8.5 };                   // the push: heavy, swings past and settles back
+    const springs = new Map(doors.map(d => [d, { a: 0, v: 0, to: 0, ...SOFT, leaf: d.querySelector('.door__leaf') }]));
+    const render = (d, s) => {
+      s.leaf.style.transform = s.a ? `rotateY(${-s.a}deg)` : '';
+      d.style.setProperty('--open', Math.min(1, Math.max(0, s.a / OPEN)).toFixed(3));
+    };
+    let springRaf = 0, springLast = 0;
+    const springLoop = now => {
+      const dt = Math.min(0.033, (now - springLast) / 1000 || 0.016);
+      springLast = now;
+      let moving = false;
+      springs.forEach((s, d) => {
+        // two half-steps keep the stiff latch spring stable at low frame rates
+        for (let i = 0; i < 2; i++) {
+          s.v += (s.k * (s.to - s.a) - s.c * s.v) * (dt / 2);
+          s.a += s.v * (dt / 2);
+        }
+        if (Math.abs(s.to - s.a) < 0.05 && Math.abs(s.v) < 0.05) { s.a = s.to; s.v = 0; } else moving = true;
+        render(d, s);
+      });
+      springRaf = moving ? requestAnimationFrame(springLoop) : 0;
+    };
+    const swing = (d, to, params = SOFT) => {
+      const s = springs.get(d);
+      Object.assign(s, params, { to });
+      if (reduceMotion) { s.a = to; s.v = 0; render(d, s); return; }
+      if (!springRaf) { springLast = performance.now(); springRaf = requestAnimationFrame(springLoop); }
+    };
+
     doors.forEach(d => {
       d.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse' && !busy) peek(d); });
-      d.addEventListener('focus', () => { if (!busy && d.matches(':focus-visible')) peek(d); });
-      d.addEventListener('blur', () => { if (!busy) peek(null); });
+      // the closer the hand is to the handle side, the further the door gives
+      d.addEventListener('pointermove', e => {
+        if (e.pointerType !== 'mouse' || busy) return;
+        const r = d.querySelector('.door__frame').getBoundingClientRect();
+        const x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+        swing(d, 6 + x * x * 30);
+      });
+      d.addEventListener('pointerleave', () => { if (!busy) swing(d, 0); });
+      d.addEventListener('focus', () => { if (!busy && d.matches(':focus-visible')) { peek(d); swing(d, 18); } });
+      d.addEventListener('blur', () => { if (!busy) { peek(null); swing(d, 0); } });
       d.addEventListener('click', e => { e.preventDefault(); enterRoom(d); });
     });
     hall.querySelector('.hall__doors').addEventListener('pointerleave', () => { if (!busy) peek(null); });
@@ -753,35 +797,72 @@
       hall.style.setProperty('--cy', `${e.clientY - r.top + 14}px`);
     });
 
-    // Door swings open → camera pushes into the light → room
+    // v6.5 sequence: handle turns → latch gives a few degrees → a shove swings the door wide
+    // (spring overshoots, settles) → other doors slide away → a short walk in, with a step bob →
+    // the room opens out of the doorway's arch (iris), already the colour seen through the door.
+    let walk = null;
     async function enterRoom(door) {
       if (busy) return;
       busy = true;
       const id = door.dataset.room;
       if (!reduceMotion) {
         peek(door);
-        door.classList.add('is-open');
-        await wait(450);
+        door.classList.add('is-turn');
+        await wait(150);
+        swing(door, 7, LATCH);                         // click — the latch lets go
+        await wait(170);
+        swing(door, OPEN, SHOVE);                      // the push
+        await wait(220);
+        door.classList.remove('is-turn');              // hand lets go → handle springs back up
+        await wait(200);
+        hall.classList.add('is-entering');
+        // Real camera walk: the strip moves toward us in 3D under the hall's perspective (not a flat
+        // zoom), so the doorway grows faster the closer we get and the neighbours fly past the edges.
         const strip = hall.querySelector('.hall__doors');
         const fr = door.querySelector('.door__frame').getBoundingClientRect();
-        const sr = strip.getBoundingClientRect();
-        strip.style.transformOrigin = `${fr.left + fr.width / 2 - sr.left}px ${fr.top + fr.height * .55 - sr.top}px`;
-        strip.style.transform = 'scale(5)';
+        const hr = hall.getBoundingClientRect();
+        hall.style.perspectiveOrigin = `${fr.left + fr.width / 2 - hr.left}px ${fr.top + fr.height * .62 - hr.top}px`;
+        hall.classList.add('is-walking');
+        strip.style.transition = 'none';
+        walk = strip.animate([                         // two steps, a small dip + sway on each footfall
+          { transform: 'translate3d(0, 0, 0)' },
+          { transform: 'translate3d(-2px, 5px, 170px)', offset: .28, easing: 'ease-out' },
+          { transform: 'translate3d(1px, -2px, 300px)', offset: .5, easing: 'ease-in' },
+          { transform: 'translate3d(2px, 6px, 560px)', offset: .8, easing: 'ease-out' },
+          { transform: 'translate3d(0, 0, 720px)' }
+        ], { duration: 820, easing: 'cubic-bezier(.5, 0, .7, 1)', fill: 'forwards' });
+        await wait(560);
+        // stepping into a bright room: the doorway's light floods the screen, then the eyes adjust
+        const r = door.querySelector('.door__light').getBoundingClientRect();
+        const rad = `${Math.round(r.width / 2)}px`;
+        flash.style.transition = 'none';
+        flash.style.clipPath = `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px round ${rad} ${rad} 0 0)`;
         flash.classList.add('is-on');
-        await wait(650);
+        flash.getBoundingClientRect();
+        flash.style.transition = 'clip-path .42s cubic-bezier(.6, 0, .3, 1)';
+        flash.style.clipPath = 'inset(0px 0px 0px 0px round 0px 0px 0 0)';
+        await wait(440);
       }
       history.pushState({ fromHall: true }, '', `#/${id}`);
       route();
-      await wait(60);
+      if (!reduceMotion) {
+        await wait(120);
+        flash.style.transition = 'opacity .7s ease-out';   // eyes adjust to the room
+        flash.classList.remove('is-on');
+        await wait(720);
+        flash.style.transition = ''; flash.style.clipPath = '';
+      } else await wait(60);
       strip_reset(door);
-      flash.classList.remove('is-on');
       busy = false;
     }
     function strip_reset(door) {
       const strip = hall.querySelector('.hall__doors');
-      strip.style.transition = 'none';
+      walk?.cancel(); walk = null;
       strip.style.transform = '';
-      door.classList.remove('is-open');
+      hall.classList.remove('is-entering', 'is-walking');
+      hall.style.perspectiveOrigin = '';
+      door.classList.remove('is-turn');
+      doors.forEach(d => { d.style.removeProperty('--push'); const s = springs.get(d); Object.assign(s, SOFT, { a: 0, v: 0, to: 0 }); render(d, s); });
       peek(null);
       requestAnimationFrame(() => { strip.style.transition = ''; });
     }
@@ -832,7 +913,7 @@
     if (refocus) hall?.querySelector(`.door[data-room="${room.id.replace('room-', '')}"]`)?.focus({ preventScroll: true });
   };
   const route = () => {
-    const m = location.hash.match(/^#\/(games|web|apps)$/);
+    const m = location.hash.match(/^#\/(games|web|apps|saas)$/);
     if (m) openRoom(m[1]);
     else closeRoom(false, !location.hash || location.hash === '#work'); // back to the hall → focus its door
   };

@@ -116,15 +116,52 @@
   --room-games: #F1E4DA;
   --room-web: #E2E6EC;
   --room-apps: #E5EADF;
+  --room-saas: #DFE9E7;
+  --door-inner: #F6DDB0;                 /* warm lamp-lit room behind every door (same for all) */
+  --door-lamp: rgba(255, 190, 100, .8);  /* pendant lamp light inside each doorway */
+  --door-spill: rgba(255, 226, 180, .5);
   --mock-night: #15131F;
   --mock-porcelain: #F8FAFC;
   --mock-indigo: #5B5BD6;
   --mock-violet: #7C5CE6;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --lamp: rgba(255, 200, 140, .12); --room-games: #241C18; --room-web: #1A1D23; --room-apps: #1C211B; }
+  :root:not([data-theme="light"]) { --lamp: rgba(255, 200, 140, .12); --room-games: #241C18; --room-web: #1A1D23; --room-apps: #1C211B; --room-saas: #182120; --door-spill: rgba(255, 210, 150, .28); }
 }
-:root[data-theme="dark"] { --lamp: rgba(255, 200, 140, .12); --room-games: #241C18; --room-web: #1A1D23; --room-apps: #1C211B; }
+:root[data-theme="dark"] { --lamp: rgba(255, 200, 140, .12); --room-games: #241C18; --room-web: #1A1D23; --room-apps: #1C211B; --room-saas: #182120; --door-spill: rgba(255, 210, 150, .28); }
+
+/* v6.3 — Footer / Pixel trail (always on the dark CTA panel → same in both themes).
+   Trail = lighter tints of the door / brass palette so they read on ink. */
+:root {
+  --trail-rust: #D9784A;
+  --trail-brass: #E3BF72;
+  --trail-sage: #9DB592;
+  --trail-blue: #7F9CD6;
+  --trail-plum: #C28AAE;
+  --trail-cell: rgba(237, 231, 225, .05);
+  --trail-plane: #F5F1EC;
+  --trail-fold: #C9BFB7;
+}
+
+/* v6.7 — Margin / Pixel trail: same idea in the page's side margins, on the page background.
+   Light theme uses the door / brass colours (they read on parchment); dark uses the trail tints. */
+:root {
+  --margin-cell: rgba(26, 24, 24, .07);
+  --margin-1: var(--door-rust); --margin-2: var(--brass); --margin-3: var(--door-sage);
+  --margin-4: var(--door-navy); --margin-5: var(--door-plum);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --margin-cell: rgba(237, 231, 225, .06);
+    --margin-1: var(--trail-rust); --margin-2: var(--trail-brass); --margin-3: var(--trail-sage);
+    --margin-4: var(--trail-blue); --margin-5: var(--trail-plum);
+  }
+}
+:root[data-theme="dark"] {
+  --margin-cell: rgba(237, 231, 225, .06);
+  --margin-1: var(--trail-rust); --margin-2: var(--trail-brass); --margin-3: var(--trail-sage);
+  --margin-4: var(--trail-blue); --margin-5: var(--trail-plum);
+}
 
 /* v2.4 — hero flip notepad (paper stays light in both themes) */
 :root {

@@ -263,10 +263,16 @@ ul, ol { list-style: none; }
 .section__head--center .lead { margin-inline: auto; max-width: 46ch; }
 .hall-section { overflow: hidden; }
 .hall {
-  --dw: clamp(96px, 23vw, 250px); --gap: clamp(14px, 4.5vw, 64px);
+  --dw: clamp(70px, 19.5vw, 220px); --gap: clamp(10px, 3.4vw, 52px);
   position: relative; max-width: var(--container); margin: 0 auto; padding: 0 var(--space-sm);
 }
 .hall__doors { position: relative; z-index: 1; display: flex; justify-content: center; gap: var(--gap); transition: transform .9s cubic-bezier(.7, 0, .3, 1); }
+/* phones: 4 doors in one row are too small → 2 × 2 grid, each door keeps its own threshold */
+@media (max-width: 639px) {
+  .hall { --dw: clamp(110px, 36vw, 160px); --gap: 28px; }
+  .hall__doors { display: grid; grid-template-columns: repeat(2, var(--dw)); justify-content: center; column-gap: var(--gap); row-gap: var(--space-md); }
+  .hall .hall__floor { display: none; }
+}
 .hall__floor { position: absolute; left: 50%; width: 100vw; transform: translateX(-50%); top: calc(var(--dw) * 1.88); height: 14px; border-top: 1px solid var(--color-border); background: var(--color-surface); }
 
 /* door */
@@ -285,11 +291,52 @@ ul, ol { list-style: none; }
   background: var(--door-frame); border-radius: var(--radius-sm); box-shadow: var(--shadow-soft);
 }
 .door__light, .door__leaf { position: absolute; inset: 9% 7% 0; border-radius: 999px 999px 0 0; }
-.door__light { background: var(--door-glow); box-shadow: inset 0 0 40px rgba(255, 214, 150, .55); }
+/* v6.5 — the doorway shows the actual room behind it (its tint + name), lit by a pendant lamp.
+   --open (0 closed … 1 fully open) is written by the door spring in script.js. */
+.door { --open: 0; }
+.door__light {
+  overflow: hidden; isolation: isolate;
+  /* one warm lamp-lit room behind every door (v6.6: same colour for all, like the original) */
+  background: var(--door-inner);
+  box-shadow: inset 0 0 0 1px rgba(120, 70, 20, .14), inset 0 22px 36px -14px rgba(110, 60, 15, .45),
+              inset 16px 0 28px -18px rgba(110, 60, 15, .4), inset 0 0 40px rgba(255, 214, 150, .5);
+}
+.door__light::before { /* pendant lamp pool of light, brighter as the door opens */
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(70% 45% at 50% 22%, var(--door-lamp), transparent 70%);
+  opacity: calc(.35 + var(--open) * .65);
+}
+.door__light::after { /* room name, as if painted on the far wall */
+  content: attr(data-title); position: absolute; left: 10%; right: 6%; bottom: 7%;
+  font-size: clamp(14px, 3.4vw, 40px); font-weight: 600; letter-spacing: -0.03em; line-height: .95;
+  color: var(--ink-fixed); opacity: calc(var(--open) * .45);
+}
+.door__lamp { /* cord + shade hanging from the arch */
+  position: absolute; left: 50%; top: 0; width: 1px; height: 16%; background: rgba(0, 0, 0, .35); z-index: 1;
+}
+.door__lamp::after {
+  content: ""; position: absolute; left: 50%; bottom: 0; width: clamp(12px, 1.9vw, 22px); aspect-ratio: 2 / 1; transform: translateX(-50%);
+  border-radius: 999px 999px 0 0; background: var(--ink-fixed); box-shadow: 0 2px 6px 1px var(--door-lamp);
+}
+/* light wedge on the floor — widens and lengthens with the door angle */
+.door__frame::before {
+  content: ""; position: absolute; left: 7%; right: 7%; top: 100%; height: 60%; z-index: -1; pointer-events: none;
+  clip-path: polygon(0 0, 100% 0, 150% 100%, -10% 100%);
+  background: linear-gradient(180deg, var(--door-spill), transparent 90%);
+  opacity: var(--open); transform-origin: top left;
+  transform: scaleY(calc(.15 + var(--open) * .85)) skewX(calc((1 - var(--open)) * -28deg));
+}
 .door__leaf {
-  background: var(--door-c, var(--door-navy)); transform-origin: left center;
+  background: var(--door-c, var(--door-navy)); transform-origin: left center; transform-style: preserve-3d;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25), inset 0 -40px 60px -30px rgba(0, 0, 0, .35);
-  transition: transform .7s var(--ease), filter .7s var(--ease);
+  filter: brightness(calc(1 - var(--open) * .42));   /* turns away from the light */
+  will-change: transform;
+}
+/* door thickness: a slab at the free edge, only seen once the door turns */
+.door__edge {
+  position: absolute; right: 0; top: 25%; bottom: 0; width: clamp(5px, .8vw, 10px);
+  background: var(--door-c, var(--door-navy)); transform-origin: right center; transform: rotateY(-90deg);
+  box-shadow: inset 0 0 0 100px rgba(0, 0, 0, .28), inset 1px 0 0 rgba(255, 255, 255, .12);
 }
 .door__leaf::before { /* grooved inner panel */
   content: ""; position: absolute; inset: 7% 9% 2%; border-radius: 999px 999px 0 0;
@@ -306,6 +353,7 @@ ul, ol { list-style: none; }
 .door__handle {
   position: absolute; top: 61%; right: 11%; width: 30%; height: clamp(4px, .6vw, 8px); border-radius: var(--radius-full);
   background: linear-gradient(180deg, var(--brass-hi), var(--brass-lo)); box-shadow: 0 3px 4px rgba(0, 0, 0, .35);
+  transform-origin: calc(100% - 4px) 50%; transition: transform .22s cubic-bezier(.3, 1.6, .5, 1);
 }
 .door__handle::after {
   content: ""; position: absolute; right: -4px; top: 50%; width: clamp(10px, 1.5vw, 20px); aspect-ratio: 1; transform: translateY(-50%);
@@ -322,12 +370,30 @@ ul, ol { list-style: none; }
 .door--plum { --door-c: var(--door-plum); }
 .door--sage { --door-c: var(--door-sage); }
 .door--rust { --door-c: var(--door-rust); }
+.door--teal { --door-c: var(--door-teal); }
+/* v6.6 realism details */
+.door::before { opacity: calc(.7 + var(--open) * .3); transform: translateX(-50%) scale(calc(1 + var(--open) * .25)); } /* hallway warms up */
+.door__frame { perspective: 900px; }
+.door__hinge { /* two brass knuckles on the hinge side */
+  position: absolute; left: -2px; top: 30%; width: clamp(3px, .45vw, 6px); height: 7%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--brass-lo), var(--brass-hi) 45%, var(--brass-lo)); box-shadow: 0 1px 2px rgba(0, 0, 0, .4);
+}
+.door__hinge--lo { top: auto; bottom: 9%; }
+.door__leaf::after { /* sheen sliding across the wood as the door turns to the light */
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(100deg, transparent 35%, rgba(255, 240, 215, .16) 47%, transparent 60%) no-repeat;
+  background-size: 260% 100%; background-position: calc(100% - var(--open) * 100%) 0;
+  opacity: calc(.25 + var(--open) * .75);
+}
 
-/* states: peek (hover / focus), open (click) */
+/* states: peek (hover / focus), turn (handle pressed), hall entering. Leaf angle = JS spring (v6.5) */
+.door { transition: opacity .5s var(--ease), filter .5s var(--ease), transform .7s cubic-bezier(.7, 0, .3, 1); }
 .door:focus-visible .door__frame { outline: 2px solid var(--color-secondary); outline-offset: 6px; }
 .hall.is-peek .door:not(.is-active) { opacity: .16; filter: blur(2px) grayscale(.4); }
-.door.is-active .door__leaf { transform: rotateY(-16deg); }
-.door.is-open .door__leaf { transform: rotateY(-104deg); filter: brightness(.7); }
+.door.is-active .door__handle { transform: rotate(-10deg); }
+.door.is-turn .door__handle { transform: rotate(-34deg); transition-duration: .14s; }.hall.is-entering .door:not(.is-active) { opacity: .35; filter: blur(3px); }
+.hall.is-walking { perspective: 1000px; }   /* camera walk: strip moves in Z (script.js) */
+.hall.is-entering .door__label, .hall.is-entering .hall__panel, .hall.is-entering .hall__cursor { opacity: 0; transition: opacity .3s; }
 
 /* info panel beside the active door (desktop + mouse only) */
 .hall__panel {
@@ -335,9 +401,11 @@ ul, ol { list-style: none; }
   opacity: 0; transform: translateY(10px); transition: opacity .45s var(--ease), transform .45s var(--ease);
 }
 .hall__panel .mono { margin: 6px 0 var(--space-sm); }
-.hall__panel[data-for="games"] { left: calc(50% - var(--dw) / 2 - var(--gap) + 40px); }
-.hall__panel[data-for="web"] { right: calc(50% + var(--dw) / 2 + 40px); }
-.hall__panel[data-for="apps"] { right: calc(50% - var(--dw) / 2 - var(--gap) + 40px); }
+/* 4 doors: left pair → panel to the right of the door, right pair → panel to its left */
+.hall__panel[data-for="games"] { left: calc(50% - var(--dw) - var(--gap) * 1.5 + 40px); }
+.hall__panel[data-for="web"] { left: calc(50% - var(--gap) / 2 + 40px); }
+.hall__panel[data-for="apps"] { right: calc(50% - var(--gap) / 2 + 40px); }
+.hall__panel[data-for="saas"] { right: calc(50% - var(--dw) - var(--gap) * 1.5 + 40px); }
 .hall__panel.is-on { opacity: 1; transform: none; }
 .ticks { display: grid; gap: 10px; }
 .ticks li { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; }
@@ -368,6 +436,15 @@ body.room-open { overflow: hidden; }
 .room--games { --room-bg: var(--room-games); }
 .room--web { --room-bg: var(--room-web); }
 .room--apps { --room-bg: var(--room-apps); }
+.room--saas { --room-bg: var(--room-saas); }
+/* Room placeholder card (SaaS until the first product ships) */
+.soon {
+  display: grid; gap: var(--space-xs); max-width: 640px; padding: var(--space-md);
+  border: 1px dashed var(--color-tertiary); border-radius: var(--radius-lg); background: var(--color-surface);
+}
+.soon .mono { color: var(--color-secondary); }
+.soon .shot__chips { margin-top: var(--space-xs); }
+.soon .shot__links { margin-top: var(--space-xs); }
 .room__scroll { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
 .room__inner { max-width: 1080px; padding-top: calc(var(--nav-h, 72px) + var(--space-lg)); padding-bottom: var(--space-xl); }
 .room__head { margin-bottom: var(--space-lg); }
@@ -446,7 +523,8 @@ body.room-open { overflow: hidden; }
 .mock__alarm em { font-style: normal; opacity: .8; }
 
 @media (prefers-reduced-motion: reduce) {
-  .door, .door__leaf, .hall__doors, .hall__panel, .room, .flash { transition: none; }
+  .door, .door__leaf, .hall__doors, .hall__panel, .room, .flash, .door__handle, .door__frame::before, .door__light::before, .door__light::after { transition: none; }
+  .door.is-open .door__light::before { animation: none; }
 }
 
 /* Certs */
@@ -614,7 +692,23 @@ body.room-open { overflow: hidden; }
 .cta__cols a:hover { color: #fff; }
 .cta__bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-sm); margin-top: var(--space-lg); font-size: var(--fs-body-sm); color: #8C857F; }
 .cta__bottom a:hover { color: var(--paper-fixed); }
-@media (min-width: 860px) { .cta__cols { grid-template-columns: repeat(4, 1fr); } }
+
+/* Margin / Pixel trail (v6.7) — fixed canvas behind all content; trail.js only paints in the side margins */
+.margin-trail { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+
+/* Footer / Pixel trail (v6.3) — canvas grid + DOM plane, driven by trail.js */
+.trail { position: relative; height: 108px; margin-top: var(--space-lg); touch-action: pan-y; user-select: none; }
+.trail__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.trail__plane {
+  position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .45));
+}
+.trail__wing { fill: var(--trail-plane); }
+.trail__fold { fill: var(--trail-fold); }
+.trail__keel { fill: var(--brass-lo); opacity: .55; }
+.trail + .cta__cols { margin-top: var(--space-md); }
+@media (max-width: 639px) { .trail { height: 90px; } }
+@media (min-width: 700px) { .cta__cols { grid-template-columns: repeat(4, 1fr); } }
 @media (prefers-reduced-motion: reduce) {
   .odo__strip, .glow, .cord, .dial { transition: none !important; }
   .cord__bob, .cord__cap { animation: none !important; }
@@ -1030,7 +1124,7 @@ html:has(.gate[open]) { overflow: hidden; }
 .sem-progress__step.is-now a { border-top-color: var(--color-secondary); color: var(--color-on-surface); }
 
 /* Accordion / Semester */
-.sems { display: grid; gap: var(--space-xs); }
+.sems { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-xs); }
 .sem { background: var(--color-neutral); border: 1px solid var(--color-border); border-radius: var(--radius-lg); scroll-margin-top: 96px; transition: border-color .25s var(--ease); }
 .sem[open] { background: var(--color-surface); border-color: var(--color-tertiary); box-shadow: var(--shadow-soft); }
 .sem__head { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); cursor: pointer; list-style: none; border-radius: var(--radius-lg); }
@@ -1053,6 +1147,14 @@ html:has(.gate[open]) { overflow: hidden; }
 }
 .sem__badge { margin-left: var(--space-xs); padding: 2px 8px; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-on-primary); font-size: var(--fs-caption); font-weight: 600; vertical-align: 2px; white-space: nowrap; }
 .sem__title { white-space: nowrap; }
+/* phones: title + "6 notes" / "7 practice" badges wrap instead of pushing the card past the screen */
+@media (max-width: 639px) {
+  .sem__head { gap: var(--space-xs); padding: var(--space-sm); }
+  .sem__head > * { min-width: 0; }
+  .sem__title { white-space: normal; line-height: 1.6; }
+  .sem__badge { margin-left: 4px; }
+  .sem__body { padding: 0 var(--space-sm) var(--space-sm); }
+}
 @media (max-width: 639px) { .sem__badge { display: none; } }
 .sem__summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-xs) var(--space-sm); padding: var(--space-sm) 0; border-top: 1px solid var(--color-border); margin-bottom: var(--space-xs); }
 .sem__facts { color: var(--color-muted); }
@@ -1061,7 +1163,7 @@ html:has(.gate[open]) { overflow: hidden; }
 .sem__sub { margin-top: var(--space-md); border-top: 0 !important; }
 
 /* Card / Subject — link card (notes) or quiet card (notes coming) */
-.subjects { display: grid; gap: var(--space-sm); }
+.subjects { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-sm); }
 @media (min-width: 640px) { .subjects { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1040px) { .subjects { grid-template-columns: repeat(3, 1fr); } }
 .subject {
@@ -1120,7 +1222,7 @@ html:has(.gate[open]) { overflow: hidden; }
 .practice { margin-top: var(--space-md); }
 .practice__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px var(--space-sm); padding-top: var(--space-sm); border-top: 1px solid var(--color-border); margin-bottom: var(--space-xs); }
 .sem__body .practice__head .caption { padding-top: 0; border-top: 0; margin-bottom: 0; }
-.practice__list { display: grid; gap: var(--space-xs); }
+.practice__list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-xs); }
 @media (min-width: 640px) { .practice__list { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1040px) { .practice__list { grid-template-columns: repeat(3, 1fr); } }
 .practice__item {
@@ -1190,11 +1292,14 @@ html:has(.gate[open]) { overflow: hidden; }
   animation: course-in .4s var(--ease);
 }
 
-@media (max-width: 759px) {
+/* tools (unit select + Practice/Syllabus + pager + full tab) don't fit beside the title below ~1024px → own row */
+@media (max-width: 1023px) {
   .studybar__row { flex-wrap: wrap; row-gap: var(--space-xs); }
   .studybar__tools { order: 3; width: 100%; }
   .unit-select { flex: 1 1 auto; min-width: 0; }
   .unit-select select { width: 100%; max-width: none; }
+}
+@media (max-width: 639px) {
   .studybar__syl { display: none; }
   .reader__resume { border-radius: var(--radius-lg); padding: var(--space-sm); }
 }
